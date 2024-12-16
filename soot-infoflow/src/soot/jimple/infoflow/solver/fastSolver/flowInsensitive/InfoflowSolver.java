@@ -11,7 +11,6 @@
 package soot.jimple.infoflow.solver.fastSolver.flowInsensitive;
 
 import java.util.Collection;
-import java.util.Map;
 import java.util.Set;
 
 import heros.FlowFunction;
@@ -22,7 +21,6 @@ import soot.jimple.infoflow.collect.MyConcurrentHashMap;
 import soot.jimple.infoflow.data.Abstraction;
 import soot.jimple.infoflow.problems.AbstractInfoflowProblem;
 import soot.jimple.infoflow.solver.*;
-import soot.jimple.infoflow.solver.cfg.IInfoflowCFG;
 import soot.jimple.infoflow.solver.executors.InterruptableExecutor;
 import soot.jimple.infoflow.solver.functions.SolverCallFlowFunction;
 import soot.jimple.infoflow.solver.functions.SolverCallToReturnFlowFunction;
@@ -35,7 +33,7 @@ import soot.jimple.infoflow.solver.functions.SolverReturnFlowFunction;
  * edges containing new taint information
  * 
  */
-public class InfoflowSolver extends FlowInsensitiveSolver<Unit, Abstraction, IInfoflowCFG>
+public class InfoflowSolver extends FlowInsensitiveSolver
 		implements IInfoflowSolver {
 
 	private IFollowReturnsPastSeedsHandler followReturnsPastSeedsHandler = null;
@@ -120,14 +118,12 @@ public class InfoflowSolver extends FlowInsensitiveSolver<Unit, Abstraction, IIn
 	}
 
 	@Override
-	public Set<EndSummary<Unit, Abstraction>> endSummary(SootMethod m, Abstraction d3) {
+	public Set<EndSummary> endSummary(SootMethod m, Abstraction d3) {
 		return super.endSummary(m, d3);
-	}
-
-	@Override
-	protected void processExit(Abstraction d1, Unit n, Abstraction d2) {
-		super.processExit(d1, n, d2);
-
+	}	
+	
+	/*protected void processExit(PathEdge<Unit, Abstratction> edge) {
+		super.processExit(edge);
 		if (followReturnsPastSeeds && followReturnsPastSeedsHandler != null) {
 			final SootMethod methodThatNeedsSummary = icfg.getMethodOf(n);
 			final Map<Unit, Map<Abstraction, Abstraction>> inc = incoming(d1, methodThatNeedsSummary);
@@ -135,7 +131,7 @@ public class InfoflowSolver extends FlowInsensitiveSolver<Unit, Abstraction, IIn
 			if (inc == null || inc.isEmpty())
 				followReturnsPastSeedsHandler.handleFollowReturnsPastSeeds(d1, n, d2);
 		}
-	}
+	}*/
 
 	@Override
 	public void setFollowReturnsPastSeedsHandler(IFollowReturnsPastSeedsHandler handler) {

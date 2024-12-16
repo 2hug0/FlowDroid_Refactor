@@ -23,7 +23,6 @@ import soot.jimple.infoflow.solver.EndSummary;
 import soot.jimple.infoflow.solver.IFollowReturnsPastSeedsHandler;
 import soot.jimple.infoflow.solver.IInfoflowSolver;
 import soot.jimple.infoflow.solver.IncomingRecord;
-import soot.jimple.infoflow.solver.cfg.IInfoflowCFG;
 import soot.jimple.infoflow.solver.executors.InterruptableExecutor;
 import soot.jimple.infoflow.solver.functions.SolverCallFlowFunction;
 import soot.jimple.infoflow.solver.functions.SolverCallToReturnFlowFunction;
@@ -37,7 +36,7 @@ import soot.util.ConcurrentHashMultiMap;
  * edges containing new taint information
  * 
  */
-public class InfoflowSolver extends IFDSSolver<Unit, Abstraction, IInfoflowCFG>
+public class InfoflowSolver extends IFDSSolver
 		implements IInfoflowSolver {
 
 	private IFollowReturnsPastSeedsHandler followReturnsPastSeedsHandler = null;
@@ -65,7 +64,7 @@ public class InfoflowSolver extends IFDSSolver<Unit, Abstraction, IInfoflowCFG>
 			}
 		}
 
-		propagate(edge.factAtSource(), edge.getTarget(), edge.factAtTarget(), null, false);
+		propagate(edge.factAtSource(), edge.getTarget(), edge.factAtTarget(), null, false, null);
 		return true;
 	}
 
@@ -76,7 +75,7 @@ public class InfoflowSolver extends IFDSSolver<Unit, Abstraction, IInfoflowCFG>
 	}
 
 	@Override
-	public Set<IncomingRecord<Unit, Abstraction>> incoming(Abstraction d1, SootMethod m) {
+	public Set<IncomingRecord> incoming(Abstraction d1, SootMethod m) {
 		// Redirect to peer group
 		return solverPeerGroup.incoming(d1, m);
 	}
@@ -140,7 +139,7 @@ public class InfoflowSolver extends IFDSSolver<Unit, Abstraction, IInfoflowCFG>
 	}
 
 	@Override
-	public Set<EndSummary<Unit, Abstraction>> endSummary(SootMethod m, Abstraction d3) {
+	public Set<EndSummary> endSummary(SootMethod m, Abstraction d3) {
 		return super.endSummary(m, d3);
 	}
 
@@ -154,7 +153,7 @@ public class InfoflowSolver extends IFDSSolver<Unit, Abstraction, IInfoflowCFG>
 			final Abstraction d2 = edge.factAtTarget();
 
 			final SootMethod methodThatNeedsSummary = icfg.getMethodOf(u);
-			final Set<IncomingRecord<Unit, Abstraction>> inc = incoming(d1, methodThatNeedsSummary);
+			final Set<IncomingRecord> inc = incoming(d1, methodThatNeedsSummary);
 
 			if (inc == null || inc.isEmpty())
 				followReturnsPastSeedsHandler.handleFollowReturnsPastSeeds(d1, u, d2);

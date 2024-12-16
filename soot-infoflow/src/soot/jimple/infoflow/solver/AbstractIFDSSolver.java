@@ -327,7 +327,7 @@ public abstract class AbstractIFDSSolver implements IMemoryBoundedSolver, IStrat
 	 *                           subclasses of {@link IFDSSolver})
 	 * @param scheduleTarget     The target where to schedule the new edge
 	 */
-	protected void propagate(Abstraction sourceVal, Unit target, Abstraction targetVal,
+	public void propagate(Abstraction sourceVal, Unit target, Abstraction targetVal,
 			/* deliberately exposed to clients */ Unit relatedCallSite,
 			/* deliberately exposed to clients */ boolean isUnbalancedReturn, ScheduleTarget scheduleTarget) {
 		// Let the memory manager run

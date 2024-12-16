@@ -22,6 +22,7 @@ import soot.jimple.infoflow.problems.AbstractInfoflowProblem;
 import soot.jimple.infoflow.solver.EndSummary;
 import soot.jimple.infoflow.solver.IFollowReturnsPastSeedsHandler;
 import soot.jimple.infoflow.solver.IInfoflowSolver;
+import soot.jimple.infoflow.solver.ISolverPeerGroup;
 import soot.jimple.infoflow.solver.IncomingRecord;
 import soot.jimple.infoflow.solver.executors.InterruptableExecutor;
 import soot.jimple.infoflow.solver.functions.SolverCallFlowFunction;
@@ -74,7 +75,7 @@ public class InfoflowSolver extends IFDSSolver implements IInfoflowSolver {
 	}
 
 	@Override
-	public Set<IncomingRecord<Unit, Abstraction>> incoming(Abstraction d1, SootMethod m) {
+	public Set<IncomingRecord> incoming(Abstraction d1, SootMethod m) {
 		// Redirect to peer group
 		return solverPeerGroup.incoming(d1, m);
 	}
@@ -138,7 +139,7 @@ public class InfoflowSolver extends IFDSSolver implements IInfoflowSolver {
 	}
 
 	@Override
-	public Set<EndSummary<Unit, Abstraction>> endSummary(SootMethod m, Abstraction d3) {
+	public Set<EndSummary> endSummary(SootMethod m, Abstraction d3) {
 		return super.endSummary(m, d3);
 	}
 
@@ -167,6 +168,11 @@ public class InfoflowSolver extends IFDSSolver implements IInfoflowSolver {
 	@Override
 	public AbstractInfoflowProblem getTabulationProblem() {
 		return problem;
+	}
+
+	@Override
+	public void setPeerGroup(ISolverPeerGroup solverPeerGroup) {
+		this.solverPeerGroup = solverPeerGroup;
 	}
 
 }

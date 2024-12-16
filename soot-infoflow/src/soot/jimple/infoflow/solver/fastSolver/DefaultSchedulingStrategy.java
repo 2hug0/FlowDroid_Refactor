@@ -3,7 +3,7 @@ package soot.jimple.infoflow.solver.fastSolver;
 import soot.Unit;
 import soot.jimple.infoflow.data.Abstraction;
 import soot.jimple.infoflow.solver.AbstractIFDSSolver;
-import soot.jimple.infoflow.solver.fastSolver.IFDSSolver.ScheduleTarget;
+import soot.jimple.infoflow.solver.AbstractIFDSSolver.ScheduleTarget;
 
 /**
  * Default implementations for scheduling strategies

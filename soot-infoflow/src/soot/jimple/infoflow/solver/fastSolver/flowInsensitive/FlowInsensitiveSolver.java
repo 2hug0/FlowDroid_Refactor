@@ -22,7 +22,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import org.checkerframework.checker.units.qual.N;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -89,8 +88,7 @@ public class FlowInsensitiveSolver extends AbstractIFDSSolver {
 			@SuppressWarnings("rawtypes") CacheBuilder flowFunctionCacheBuilder) {
 		super(tabulationProblem, flowFunctionCacheBuilder);
 	}
-
-	@Override
+	
 	private void processCall(Abstraction d1, Unit n, Abstraction d2) {
 		Collection<Unit> returnSiteNs = icfg.getReturnSitesOfCallAt(n);
 
@@ -334,26 +332,29 @@ public class FlowInsensitiveSolver extends AbstractIFDSSolver {
 	@Override
 	protected void processNormalFlow(PathEdge<Unit, Abstraction> edge) {
 		final Abstraction d1 = edge.factAtSource();
-		final Unit n = edge.getTarget();
+		final Unit n = edge.getTarget();		
 		final Abstraction d2 = edge.factAtTarget();
+
 
 		for (Unit m : icfg.getSuccsOf(n)) {
 			FlowFunction<Abstraction> flowFunction = flowFunctions.getNormalFlowFunction(n, m);
 			Set<Abstraction> res = computeNormalFlowFunction(flowFunction, d1, d2);
+			SootMethod sootMethod = icfg.getMethodOf(m);
 			if (res != null && !res.isEmpty()) {
 				for (Abstraction d3 : res) {
 					if (memoryManager != null && d2 != d3)
 						d3 = memoryManager.handleGeneratedMemoryObject(d2, d3);
 					if (d3 != null && d3 != d2)
-						propagate(d1, method, d3, null, false);
+						propagate(d1, sootMethod, d3, null, false);
 				}
 			}
 		}
 	}
 
-	private void processMethod(PathEdge<SootMethod, Abstraction> edge) {
+	private void processMethod(PathEdge<Unit, Abstraction> edge) {
 		Abstraction d1 = edge.factAtSource();
-		SootMethod target = edge.getTarget();
+		Unit n = edge.getTarget();
+		SootMethod target = icfg.getMethodOf(n);
 		Abstraction d2 = edge.factAtTarget();
 
 		// Iterate over all statements in the method and apply the propagation
@@ -361,10 +362,10 @@ public class FlowInsensitiveSolver extends AbstractIFDSSolver {
 			if (icfg.isCallStmt(u))
 				processCall(d1, u, d2);
 			else {
-				if (icfg.isExitStmt(u))
-					processExit(d1, u, d2);
+				if (icfg.isExitStmt(u))					
+					processExit(edge);
 				if (!icfg.getSuccsOf(u).isEmpty())
-					processNormalFlow(d1, u, d2, target);
+					processNormalFlow(edge);
 			}
 		}
 	}
@@ -402,7 +403,7 @@ public class FlowInsensitiveSolver extends AbstractIFDSSolver {
 	 *                           with jumpFn . This can happen when externally
 	 *                           injecting edges that don't come out of this solver.
 	 */
-	@SuppressWarnings("unchecked")
+	
 	protected void propagate(Abstraction sourceVal, SootMethod target, Abstraction targetVal,
 			/* deliberately exposed to clients */ Unit relatedCallSite,
 			/* deliberately exposed to clients */ boolean isUnbalancedReturn) {
@@ -417,28 +418,35 @@ public class FlowInsensitiveSolver extends AbstractIFDSSolver {
 		// Check the path length
 		if (maxAbstractionPathLength >= 0 && targetVal.getPathLength() > maxAbstractionPathLength)
 			return;
-
+		
 		final PathEdge<SootMethod, Abstraction> edge = new PathEdge<>(sourceVal, target, targetVal);
-		final Abstraction existingVal = addFunction(edge);
+		final Abstraction existingVal = addFunctionSootMethod(edge);
+
 		if (existingVal != null) {
 			// Check whether we need to retain this abstraction
 			boolean isEssential;
 			if (memoryManager == null)
 				isEssential = relatedCallSite != null && icfg.isCallStmt(relatedCallSite);
 			else
-				isEssential = memoryManager.isEssentialJoinPoint(targetVal, (N) relatedCallSite);
+				isEssential = memoryManager.isEssentialJoinPoint(targetVal, relatedCallSite);
 
 			if (maxJoinPointAbstractions < 0 || existingVal.getNeighborCount() < maxJoinPointAbstractions
 					|| isEssential)
 				existingVal.addNeighbor(targetVal);
 		} else {
-			scheduleEdgeProcessing(edge);
+			//scheduleEdgeProcessing(edge);
+			System.out.println("ERROR: Missing scheduleEdgeProcessing");
 		}
 	}
 
-	@Override
-	public Abstraction addFunction(PathEdge<SootMethod, Abstraction> edge) {
+	
+	public Abstraction addFunctionSootMethod(PathEdge<SootMethod, Abstraction> edge) {
 		return jumpFunctions.putIfAbsent(edge, edge.factAtTarget());
+	}
+
+	@Override
+	public Abstraction addFunction(PathEdge<Unit, Abstraction> edge) {
+		return edge.factAtTarget();
 	}
 
 	protected Set<EndSummary> endSummary(SootMethod m, Abstraction d3) {
@@ -478,5 +486,9 @@ public class FlowInsensitiveSolver extends AbstractIFDSSolver {
 	protected String getDebugName() {
 		return "FLOW-INSENSIIVE IFDS SOLVER";
 	}
+
+	@Override
+	protected void processCall(PathEdge<Unit, Abstraction> edge){
+	};
 
 }

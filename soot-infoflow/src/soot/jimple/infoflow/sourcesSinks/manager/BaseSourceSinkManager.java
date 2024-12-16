@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.sun.istack.NotNull;
+import org.jetbrains.annotations.NotNull;
 
 import heros.solver.IDESolver;
 import heros.solver.Pair;

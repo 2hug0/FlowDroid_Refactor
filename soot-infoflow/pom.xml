@@ -148,6 +148,22 @@
 			<version>${slf4j.version}</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+    		<groupId>org.jetbrains</groupId>
+    		<artifactId>annotations</artifactId>
+    		<version>24.0.0</version>
+		</dependency>
+		<dependency>
+   			<groupId>org.ow2.asm</groupId>
+    		<artifactId>asm</artifactId>
+    		<version>9.5</version>
+		</dependency>
+		<dependency>
+    		<groupId>org.ow2.asm</groupId>
+    		<artifactId>asm-commons</artifactId>
+    		<version>9.5</version> <!-- Passen Sie die Version an, falls erforderlich -->
+    		<scope>test</scope> <!-- Wenn es nur für Tests benötigt wird -->
+		</dependency>
 	</dependencies>
 
 	

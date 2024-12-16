@@ -1,6 +1,6 @@
 package soot.jimple.infoflow.solver.cfg;
 
-import com.sun.istack.NotNull;
+import org.jetbrains.annotations.NotNull;
 import soot.*;
 import soot.jimple.IfStmt;
 import soot.jimple.Stmt;
