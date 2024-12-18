@@ -139,5 +139,17 @@
             <version>20240303</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.ow2.asm</groupId>
+            <artifactId>asm-commons</artifactId>
+            <version>9.5</version>
+        </dependency>
+        <dependency>
+            <groupId>rt</groupId>
+            <artifactId>rt</artifactId>
+            <version>1.8</version>
+            <scope>system</scope>
+            <systemPath>${java.home}\lib\rt.jar</systemPath>
+        </dependency>
     </dependencies>
 </project>

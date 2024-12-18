@@ -161,8 +161,8 @@
 		<dependency>
     		<groupId>org.ow2.asm</groupId>
     		<artifactId>asm-commons</artifactId>
-    		<version>9.5</version> <!-- Passen Sie die Version an, falls erforderlich -->
-    		<scope>test</scope> <!-- Wenn es nur für Tests benötigt wird -->
+    		<version>9.5</version> 
+    		<scope>test</scope> 
 		</dependency>
 	</dependencies>
 

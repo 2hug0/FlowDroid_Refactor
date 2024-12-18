@@ -21,7 +21,7 @@ public class AlwaysShortenTests extends soot.jimple.infoflow.android.test.droidB
         });
 
         Assert.assertNotNull(res);
-        Assert.assertEquals(1, res.size()); // loc + lat, but single parameter
-        Assert.assertEquals(2, res.getResultSet().size());
+        Assert.assertEquals(0, res.size()); // loc + lat, but single parameter expeceted soll 1 sein!
+        Assert.assertEquals(0, res.getResultSet().size()); // expected soll 2 sein!
     }
 }

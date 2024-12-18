@@ -235,5 +235,10 @@
 			<version>${slf4j.version}</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+    		<groupId>org.ow2.asm</groupId>
+    		<artifactId>asm-commons</artifactId>
+    		<version>9.5</version> 
+		</dependency>
 	</dependencies>
 </project>
