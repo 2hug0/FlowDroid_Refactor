@@ -126,7 +126,6 @@ public class IFDSSolver extends AbstractIFDSSolver {
 		gcSolverGroup.getGCPeerGroup().notifySolverTerminated();
 	}
 
-	@Override
 	protected void scheduleEdgeProcessing(PathEdge<Unit, Abstraction> edge, Pair<SootMethod, Abstraction> orgSrc) {
 		// If the executor has been killed, there is little point
 		// in submitting new tasks
@@ -208,7 +207,7 @@ public class IFDSSolver extends AbstractIFDSSolver {
 							// for each callee's start point(s)
 							for (Unit sP : startPointsOf) {
 								// create initial self-loop
-								propagate(d3, sP, d3, n, false, new Pair<>(icfg.getMethodOf(n), d1)); // line 15
+								propagate(d3, sP, d3, n, false, null); // line 15
 							}
 						}
 					}
@@ -458,43 +457,6 @@ public class IFDSSolver extends AbstractIFDSSolver {
 	}
 
 	@Override
-	protected void propagate(Abstraction sourceVal, Unit target, Abstraction targetVal,
-			/* deliberately exposed to clients */ Unit relatedCallSite,
-			/* deliberately exposed to clients */ boolean isUnbalancedReturn, Pair<SootMethod, Abstraction> orgSrc) {
-		// Let the memory manager run
-		if (memoryManager != null) {
-			sourceVal = memoryManager.handleMemoryObject(sourceVal);
-			targetVal = memoryManager.handleMemoryObject(targetVal);
-			if (targetVal == null)
-				return;
-		}
-
-		// Check the path length
-		if (maxAbstractionPathLength >= 0 && targetVal.getPathLength() > maxAbstractionPathLength)
-			return;
-
-		final PathEdge<Unit, Abstraction> edge = new PathEdge<>(sourceVal, target, targetVal);
-		final Abstraction existingVal = addFunction(edge);
-		if (existingVal != null) {
-			if (existingVal != targetVal) {
-				// Check whether we need to retain this abstraction
-				boolean isEssential;
-				if (memoryManager == null)
-					isEssential = relatedCallSite != null && icfg.isCallStmt(relatedCallSite);
-				else
-					isEssential = memoryManager.isEssentialJoinPoint(targetVal, relatedCallSite);
-
-				if (maxJoinPointAbstractions < 0 || existingVal.getNeighborCount() < maxJoinPointAbstractions
-						|| isEssential) {
-					existingVal.addNeighbor(targetVal);
-				}
-			}
-		} else {
-			scheduleEdgeProcessing(edge, orgSrc);
-		}
-	}
-
-	@Override
 	public Abstraction addFunction(PathEdge<Unit, Abstraction> edge) {
 		SootMethod method = icfg.getMethodOf(edge.getTarget());
 		PathEdge<Unit, Abstraction> oldEdge = jumpFunctions.putIfAbsent(new Pair<>(method, edge.factAtSource()), edge);
@@ -545,6 +507,6 @@ public class IFDSSolver extends AbstractIFDSSolver {
 	 * Notifies the solver that no further edges will be scheduled
 	 */
 	public void terminate() {
-	}
-
+	}	
+	
 }

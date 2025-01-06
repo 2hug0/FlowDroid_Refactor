@@ -41,6 +41,7 @@ public class InfoflowSolver extends IFDSSolver implements IInfoflowSolver {
 
 	protected IFollowReturnsPastSeedsHandler followReturnsPastSeedsHandler = null;
 	protected final AbstractInfoflowProblem problem;
+	protected ISolverPeerGroup peerGroup = null;
 
 	public InfoflowSolver(AbstractInfoflowProblem problem, InterruptableExecutor executor) {
 		super(problem);

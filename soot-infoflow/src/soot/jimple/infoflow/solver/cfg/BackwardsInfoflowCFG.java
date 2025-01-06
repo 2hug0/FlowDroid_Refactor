@@ -1,6 +1,6 @@
 package soot.jimple.infoflow.solver.cfg;
 
-import com.sun.istack.NotNull;
+import javax.annotation.Nonnull;
 import soot.*;
 import soot.jimple.IfStmt;
 import soot.jimple.Stmt;
@@ -109,8 +109,8 @@ public class BackwardsInfoflowCFG extends InfoflowCFG {
 	 * @param conditionals result list
 	 * @param doneSet already processed units
 	 */
-	private void getConditionalsRecursive(@NotNull Unit unit, @NotNull List<Unit> conditionals,
-										  @NotNull Set<Unit> doneSet) {
+	private void getConditionalsRecursive(@Nonnull Unit unit, @Nonnull List<Unit> conditionals,
+										  @Nonnull Set<Unit> doneSet) {
 		SootMethod sm = getMethodOf(unit);
 		// Exclude the dummy method
 		if (sm.getDeclaringClass().getName().equals("dummyMainClass") && sm.getName().equals("dummy"))

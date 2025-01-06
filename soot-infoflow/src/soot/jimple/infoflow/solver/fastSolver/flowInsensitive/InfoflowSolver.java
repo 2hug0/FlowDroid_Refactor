@@ -35,8 +35,7 @@ import soot.jimple.infoflow.solver.functions.SolverReturnFlowFunction;
  * edges containing new taint information
  * 
  */
-public class InfoflowSolver extends FlowInsensitiveSolver<Unit, Abstraction, IInfoflowCFG>
-		implements IInfoflowSolver {
+public class InfoflowSolver extends FlowInsensitiveSolver implements IInfoflowSolver {
 
 	private IFollowReturnsPastSeedsHandler followReturnsPastSeedsHandler = null;
 	private final AbstractInfoflowProblem problem;
@@ -120,13 +119,17 @@ public class InfoflowSolver extends FlowInsensitiveSolver<Unit, Abstraction, IIn
 	}
 
 	@Override
-	public Set<EndSummary<Unit, Abstraction>> endSummary(SootMethod m, Abstraction d3) {
+	public Set<EndSummary> endSummary(SootMethod m, Abstraction d3) {
 		return super.endSummary(m, d3);
 	}
 
 	@Override
-	protected void processExit(Abstraction d1, Unit n, Abstraction d2) {
-		super.processExit(d1, n, d2);
+	protected void processExit(PathEdge<Unit, Abstraction> edge) {
+		super.processExit(edge);
+
+		final Unit n = edge.getTarget();  	
+    	final Abstraction d1 = edge.factAtSource();
+    	final Abstraction d2 = edge.factAtTarget();
 
 		if (followReturnsPastSeeds && followReturnsPastSeedsHandler != null) {
 			final SootMethod methodThatNeedsSummary = icfg.getMethodOf(n);
