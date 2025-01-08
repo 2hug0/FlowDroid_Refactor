@@ -35,7 +35,7 @@ import soot.jimple.infoflow.sourcesSinks.definitions.ISourceSinkDefinition;
  * @author Steven Arzt
  * @author Christian Fritz
  */
-public class Abstraction implements Cloneable, FastSolverLinkedNode<Abstraction, Unit> {
+public class Abstraction implements Cloneable, FastSolverLinkedNode {
 
 	protected static boolean flowSensitiveAliasing = true;
 

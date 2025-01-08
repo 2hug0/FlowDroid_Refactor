@@ -6,7 +6,7 @@ import soot.SootMethod;
 import soot.jimple.infoflow.solver.fastSolver.FastSolverLinkedNode;
 import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
 
-public interface IPropagationStrategy<N, D extends FastSolverLinkedNode<D, N>, I extends BiDiInterproceduralCFG<N, SootMethod>> {
+public interface IPropagationStrategy<N, D extends FastSolverLinkedNode, I extends BiDiInterproceduralCFG<N, SootMethod>> {
     /**
      * Get the successors of n given d
      *

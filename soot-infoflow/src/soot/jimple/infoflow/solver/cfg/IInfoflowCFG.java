@@ -102,7 +102,7 @@ public interface IInfoflowCFG extends BiDiInterproceduralCFG<Unit, SootMethod> {
 	/**
 	 * Get all dominators of the given unit.
 	 *
-	 * @param u The unit for which tot get the dominators
+	 * @param u The unit for which to get the dominators
 	 * @return The dominators of the given unit
 	 */
 	public List<Unit> getAllDominators(Unit u);

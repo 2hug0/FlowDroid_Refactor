@@ -15,7 +15,7 @@ import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
  *
  * @author Tim Lange
  */
-public class DensePropagation<N, D extends FastSolverLinkedNode<D, N>, I extends BiDiInterproceduralCFG<N, SootMethod>>
+public class DensePropagation<N, D extends FastSolverLinkedNode, I extends BiDiInterproceduralCFG<N, SootMethod>>
         implements IPropagationStrategy<N, D, I> {
     private final I iCfg;
 

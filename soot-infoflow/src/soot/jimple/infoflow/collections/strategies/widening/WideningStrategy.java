@@ -8,7 +8,7 @@ import soot.jimple.infoflow.solver.fastSolver.FastSolverLinkedNode;
  *
  * @author Tim Lange
  */
-public interface WideningStrategy<N, D extends FastSolverLinkedNode<D, N>> {
+public interface WideningStrategy<N, D extends FastSolverLinkedNode> {
     /**
      * Widens the abstraction
      *
