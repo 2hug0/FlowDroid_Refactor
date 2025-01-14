@@ -11,6 +11,7 @@
 package soot.jimple.infoflow.solver.fastSolver.flowInsensitive;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
 
 import heros.FlowFunction;
@@ -121,9 +122,13 @@ public class InfoflowSolver extends FlowInsensitiveSolver
 	public Set<EndSummary> endSummary(SootMethod m, Abstraction d3) {
 		return super.endSummary(m, d3);
 	}	
-	
-	/*protected void processExit(PathEdge<Unit, Abstratction> edge) {
+	@Override
+	protected void processExit(PathEdge<Unit, Abstraction> edge) {
 		super.processExit(edge);
+		final Unit n = edge.getTarget();
+		final Abstraction d1 = edge.factAtSource();
+		final Abstraction d2 = edge.factAtTarget();
+
 		if (followReturnsPastSeeds && followReturnsPastSeedsHandler != null) {
 			final SootMethod methodThatNeedsSummary = icfg.getMethodOf(n);
 			final Map<Unit, Map<Abstraction, Abstraction>> inc = incoming(d1, methodThatNeedsSummary);
@@ -131,7 +136,7 @@ public class InfoflowSolver extends FlowInsensitiveSolver
 			if (inc == null || inc.isEmpty())
 				followReturnsPastSeedsHandler.handleFollowReturnsPastSeeds(d1, n, d2);
 		}
-	}*/
+	}
 
 	@Override
 	public void setFollowReturnsPastSeedsHandler(IFollowReturnsPastSeedsHandler handler) {
