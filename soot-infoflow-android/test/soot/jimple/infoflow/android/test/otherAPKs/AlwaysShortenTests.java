@@ -17,7 +17,7 @@ public class AlwaysShortenTests extends soot.jimple.infoflow.android.test.droidB
     @Test(timeout = 300000)
     public void runTestAnonymousClass1Insensitive() throws IOException, XmlPullParserException {
         InfoflowResults res = analyzeAPKFile("Callbacks/AnonymousClass1.apk", null, config -> {
-            config.getSolverConfiguration().setDataFlowSolver(InfoflowConfiguration.DataFlowSolver.FlowInsensitive);
+            config.getSolverConfiguration().setDataFlowSolver(InfoflowConfiguration.DataFlowSolver.ContextFlowSensitive);
         });
 
         Assert.assertNotNull(res);
