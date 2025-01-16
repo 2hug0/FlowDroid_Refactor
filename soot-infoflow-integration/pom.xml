@@ -146,13 +146,6 @@
 		    <artifactId>spring-web</artifactId>
 		    <version>6.1.13</version>
 			<scope>test</scope>
-		</dependency>   
-        <dependency>
-            <groupId>sun.jdk</groupId>
-            <artifactId>rt</artifactId>
-            <version>1.8</version>
-            <scope>system</scope>
-            <systemPath>${basedir}/res/rt.jar</systemPath>
-        </dependency>    
+		</dependency>            
     </dependencies>
 </project>
