@@ -7,6 +7,7 @@ import org.junit.Test;
 
 import soot.jimple.infoflow.IInfoflow;
 import soot.jimple.infoflow.InfoflowConfiguration;
+import soot.jimple.infoflow.InfoflowConfiguration.DataFlowSolver;
 import soot.jimple.infoflow.collections.strategies.widening.WideningOnRevisitStrategy;
 import soot.jimple.infoflow.collections.strategies.widening.WideningTaintPropagationHandler;
 
@@ -141,6 +142,7 @@ public class SimpleListTests extends FlowDroidTests {
     @Test(timeout = 30000)
     public void testListInsertInLoop1() {
         IInfoflow infoflow = initInfoflow();
+        Assert.assertTrue(infoflow.getConfig().getSolverConfiguration().getDataFlowSolver() != DataFlowSolver.SparseContextFlowSensitive);
         String epoint = "<" + testCodeClass + ": void " + getCurrentMethod() + "()>";
         infoflow.setTaintPropagationHandler(new WideningTaintPropagationHandler(WideningOnRevisitStrategy::new));
         infoflow.computeInfoflow(appPath, libPath, Collections.singleton(epoint), sources, sinks);

@@ -3,11 +3,11 @@ package soot.jimple.infoflow.collections.test.junit;
 import java.util.Collections;
 
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import soot.jimple.infoflow.IInfoflow;
 import soot.jimple.infoflow.InfoflowConfiguration;
+import soot.jimple.infoflow.InfoflowConfiguration.DataFlowSolver;
 
 public class AliasListTests extends FlowDroidTests {
     @Override
@@ -20,6 +20,7 @@ public class AliasListTests extends FlowDroidTests {
     @Test(timeout = 30000)
     public void testShiftOnAlias1() {
         IInfoflow infoflow = initInfoflow();
+        Assert.assertTrue(infoflow.getConfig().getSolverConfiguration().getDataFlowSolver() != DataFlowSolver.SparseContextFlowSensitive);
         infoflow.getConfig().getPathConfiguration().setPathReconstructionMode(InfoflowConfiguration.PathReconstructionMode.Fast);
         String epoint = "<" + testCodeClass + ": void " + getCurrentMethod() + "()>";
         infoflow.computeInfoflow(appPath, libPath, Collections.singleton(epoint), sources, sinks);
@@ -32,6 +33,7 @@ public class AliasListTests extends FlowDroidTests {
     @Test(timeout = 30000)
     public void testShiftOnAlias2() {
         IInfoflow infoflow = initInfoflow();
+        Assert.assertTrue(infoflow.getConfig().getSolverConfiguration().getDataFlowSolver() != DataFlowSolver.SparseContextFlowSensitive);
         infoflow.getConfig().getPathConfiguration().setPathReconstructionMode(InfoflowConfiguration.PathReconstructionMode.Fast);
         String epoint = "<" + testCodeClass + ": void " + getCurrentMethod() + "()>";
         infoflow.computeInfoflow(appPath, libPath, Collections.singleton(epoint), sources, sinks);
