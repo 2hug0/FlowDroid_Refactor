@@ -3,6 +3,7 @@ package soot.jimple.infoflow.collections.test.junit;
 import java.util.Collections;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import soot.jimple.infoflow.IInfoflow;
