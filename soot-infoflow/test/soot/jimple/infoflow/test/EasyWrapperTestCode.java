@@ -10,7 +10,6 @@
  ******************************************************************************/
 package soot.jimple.infoflow.test;
 
-import soot.jimple.StringConstant;
 import soot.jimple.infoflow.test.android.AccountManager;
 import soot.jimple.infoflow.test.android.ConnectionManager;
 import soot.jimple.infoflow.test.android.TelephonyManager;

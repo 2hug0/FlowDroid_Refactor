@@ -14,7 +14,6 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import soot.SootMethod;
-import soot.Type;
 import soot.jimple.Stmt;
 import soot.jimple.infoflow.InfoflowManager;
 import soot.jimple.infoflow.data.Abstraction;

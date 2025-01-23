@@ -2,7 +2,6 @@ package soot.jimple.infoflow.test.junit.backward;
 
 import soot.jimple.infoflow.AbstractInfoflow;
 import soot.jimple.infoflow.BackwardsInfoflow;
-import soot.jimple.infoflow.Infoflow;
 import soot.jimple.infoflow.InfoflowConfiguration;
 import soot.jimple.infoflow.cfg.BiDirICFGFactory;
 import soot.jimple.infoflow.solver.PredecessorShorteningMode;

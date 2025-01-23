@@ -8,7 +8,6 @@ import soot.jimple.infoflow.handlers.TaintPropagationHandler;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 /**
  * Widening through a taint propagation handler. Because of the nature, a full set copy is needed whenever

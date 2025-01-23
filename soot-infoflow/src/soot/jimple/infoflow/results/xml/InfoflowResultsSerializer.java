@@ -12,7 +12,6 @@ import soot.jimple.Stmt;
 import soot.jimple.infoflow.InfoflowConfiguration;
 import soot.jimple.infoflow.data.AccessPath;
 import soot.jimple.infoflow.data.AccessPathFragment;
-import soot.jimple.infoflow.data.SootMethodAndClass;
 import soot.jimple.infoflow.results.InfoflowPerformanceData;
 import soot.jimple.infoflow.results.InfoflowResults;
 import soot.jimple.infoflow.results.ResultSinkInfo;

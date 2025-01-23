@@ -4,7 +4,6 @@ import soot.jimple.infoflow.sourcesSinks.definitions.ISourceSinkDefinition;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 
 /**
  * Class containing additional information about a sink. Users of FlowDroid can

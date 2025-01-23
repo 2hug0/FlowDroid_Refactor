@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 
 import heros.solver.Pair;
 import soot.jimple.infoflow.data.AccessPath;
-import soot.jimple.infoflow.sourcesSinks.definitions.AccessPathTuple;
 import soot.jimple.infoflow.sourcesSinks.definitions.ISourceSinkDefinition;
 import soot.util.HashMultiMap;
 

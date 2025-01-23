@@ -42,7 +42,6 @@ import soot.jimple.infoflow.solver.cfg.IInfoflowCFG;
 import soot.jimple.infoflow.taintWrappers.ITaintPropagationWrapper;
 import soot.jimple.infoflow.util.SystemClassHandler;
 import soot.jimple.toolkits.ide.DefaultJimpleIFDSTabulationProblem;
-import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
 
 /**
  * abstract super class which - concentrates functionality used by

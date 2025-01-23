@@ -1,13 +1,11 @@
 package soot.jimple.infoflow.util;
 
 import soot.Unit;
-import soot.jimple.Stmt;
 import soot.jimple.infoflow.InfoflowManager;
 import soot.jimple.infoflow.data.Abstraction;
 import soot.jimple.infoflow.handlers.TaintPropagationHandler;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 
 /**

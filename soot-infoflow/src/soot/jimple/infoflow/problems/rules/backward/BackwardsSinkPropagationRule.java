@@ -2,7 +2,6 @@ package soot.jimple.infoflow.problems.rules.backward;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 
 import soot.SootMethod;
