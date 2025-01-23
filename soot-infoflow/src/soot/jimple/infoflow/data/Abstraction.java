@@ -721,9 +721,9 @@ public class Abstraction implements Cloneable, FastSolverLinkedNode {
 	}
 
 	// First Merge copy attempt
-	public Abstraction replaceActivationUnit(Unit activationUnit) {
-		Abstraction res = clone();
-		res.activationUnit = new ConcolicUnit(activationUnit);
+	public Abstraction replaceActivationUnit(ConcolicUnit activationUnit) {
+		Abstraction res = clone();				
+		res.activationUnit = activationUnit;
 		res.predecessor = this.predecessor;
 		res.currentStmt = this.currentStmt;
 		return res;

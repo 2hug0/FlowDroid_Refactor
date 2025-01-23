@@ -543,7 +543,7 @@ public class MergeInfoflowProblem extends InfoflowProblem {
 						if (!newSource.isAbstractionActive() && newSource.getActivationUnit() != null)
 							if (manager.getActivationUnitManager().getMethodOf(newSource.getActivationUnit()) == callee)
 								return null;
-						Abstraction d1 = callee.getActiveBody().getThisUnit();
+						
 						ByReferenceBoolean killAll = new ByReferenceBoolean();
 						Set<Abstraction> res = propagationRules.applyReturnFlowFunction(callerD1s, d1, newSource,
 								(Stmt) exitStmt, (Stmt) retSite, (Stmt) callSite, killAll);

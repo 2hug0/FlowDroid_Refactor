@@ -14,6 +14,7 @@ import soot.jimple.JimpleToBafContext;
 import soot.jimple.NopStmt;
 import soot.jimple.StmtSwitch;
 import soot.jimple.infoflow.data.Abstraction;
+import soot.jimple.infoflow.data.accessPaths.ConcolicUnit;
 import soot.jimple.internal.AbstractStmt;
 import soot.util.Switch;
 
@@ -27,7 +28,7 @@ public class Symbol extends AbstractStmt implements NopStmt {
 
 	protected final Abstraction abstraction;
 
-	protected final Set<Unit> targets;
+	protected final Set<ConcolicUnit> targets;
 
 	protected final int hashCode;
 
@@ -54,11 +55,11 @@ public class Symbol extends AbstractStmt implements NopStmt {
 		return callee;
 	}
 
-	public boolean addTarget(Unit u) {
+	public boolean addTarget(ConcolicUnit u) {
 		return targets.add(u);
 	}
 
-	public Set<Unit> getTargets() {
+	public Set<ConcolicUnit> getTargets() {
 		return targets;
 	}
 

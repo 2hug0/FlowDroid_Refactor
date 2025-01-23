@@ -16,6 +16,7 @@ import com.google.common.cache.LoadingCache;
 import soot.SootMethod;
 import soot.Unit;
 import soot.jimple.infoflow.data.Abstraction;
+import soot.jimple.infoflow.data.accessPaths.ConcolicUnit;
 import soot.jimple.infoflow.solver.IInfoflowSolver;
 import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
 
@@ -52,7 +53,7 @@ public class ActivationUnitManager {
 
 	public Abstraction symbolize(Unit callSite, SootMethod callee, Abstraction retSiteAbs,
 			Abstraction exitAbs) {
-		final Unit activationUnit = retSiteAbs.getActivationUnit();
+		final ConcolicUnit activationUnit = new ConcolicUnit(retSiteAbs.getActivationUnit());
 
 		final SootMethod caller = icfg.getMethodOf(callSite);
 		final Symbol symbol = new Symbol(caller, callee, exitAbs.getActiveCopy());
@@ -61,7 +62,7 @@ public class ActivationUnitManager {
 		if (old.addTarget(activationUnit))
 			onNewTargetAddedToSymbol(old, activationUnit);
 
-		return retSiteAbs.replaceActivationUnit(old);
+		return retSiteAbs.replaceActivationUnit(old.abstraction.getConcolicActivationUnit());
 	}
 
 	public Set<Abstraction> concretize(Abstraction d1, Unit callSite, Abstraction d2, 
@@ -96,7 +97,7 @@ public class ActivationUnitManager {
 		return retSiteAbs;
 	}
 
-	protected void onNewTargetAddedToSymbol(Symbol symbol, Unit target) {
+	protected void onNewTargetAddedToSymbol(Symbol symbol, ConcolicUnit target) {
 		Map<Abstraction, Map<Unit, Map<Abstraction, Abstraction>>> map = symbolIncoming.get(symbol);
 		if (map != null && !map.isEmpty()) {
 			for (Map.Entry<Abstraction, Map<Unit, Map<Abstraction, Abstraction>>> entry : map.entrySet()) {

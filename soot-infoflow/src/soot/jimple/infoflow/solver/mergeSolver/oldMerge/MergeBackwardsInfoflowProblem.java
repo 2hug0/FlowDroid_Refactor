@@ -128,7 +128,7 @@ public class MergeBackwardsInfoflowProblem extends BackwardsInfoflowProblem {
 				.symbolize(callSite, callee, activationAbs, source);
 		if (add) {
 			activationUnitsToCallSites.computeIfAbsent(res.getActivationUnit(),
-        		v -> new AbstractInfoflowProblem.CallSite()).addCallsite(callSite);
+					v -> new ConcurrentHashSet<>()).add(callSite);
 		}
 		return res;
 	}
