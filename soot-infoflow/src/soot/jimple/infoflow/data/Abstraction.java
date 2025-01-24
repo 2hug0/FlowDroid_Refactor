@@ -720,4 +720,42 @@ public class Abstraction implements Cloneable, FastSolverLinkedNode {
 		return propagationPathLength;
 	}
 
+	// New Funcitons for MergeSolver
+	public Abstraction replaceActivationUnit(ConcolicUnit activationUnit) {
+		Abstraction res = clone();
+		res.activationUnit = activationUnit;
+		res.predecessor = this.predecessor;
+		res.currentStmt = this.currentStmt;
+		return res;
+	}
+
+	public Abstraction deriveSymbolicAbstraction(ConcolicUnit activationUnit) {
+		Abstraction res = new Abstraction(this.accessPath, null,
+				this.exceptionThrown, this.isImplicit);
+		res.dependsOnCutAP = this.dependsOnCutAP;
+
+		res.activationUnit = activationUnit;
+		res.postdominators = this.postdominators == null ? null
+				: new ArrayList<UnitContainer>(this.postdominators);
+
+		res.currentStmt = null;
+		res.predecessor = null;
+		res.propagationPathLength = 1;
+		return res;
+	}
+
+	public Abstraction deriveConcreteAbstraction(Abstraction concAbs) {
+		Abstraction res = new Abstraction(this.accessPath, concAbs.sourceContext,
+				this.exceptionThrown, this.isImplicit);
+		res.dependsOnCutAP = this.dependsOnCutAP;
+
+		res.activationUnit = concAbs.activationUnit;
+		res.postdominators = this.postdominators == null ? null
+				: new ArrayList<UnitContainer>(this.postdominators);
+
+		res.currentStmt = null;
+		res.predecessor = concAbs;
+		res.propagationPathLength = this.propagationPathLength + concAbs.propagationPathLength;
+		return res;
+	}
 }
