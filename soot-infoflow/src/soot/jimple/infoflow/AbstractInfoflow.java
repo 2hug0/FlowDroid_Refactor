@@ -150,6 +150,7 @@ import soot.jimple.toolkits.callgraph.ReachableMethods;
 import soot.jimple.toolkits.pointer.DumbPointerAnalysis;
 import soot.options.Options;
 import soot.util.NumberedString;
+import soot.jimple.infoflow.solver.mergeSolver.solver.MergeInfoflowSolver;
 
 /**
  * Abstract base class for all data/information flow analyses in FlowDroid
@@ -1523,6 +1524,11 @@ public abstract class AbstractInfoflow implements IInfoflow {
 	protected IInfoflowSolver createDataFlowSolver(InterruptableExecutor executor, AbstractInfoflowProblem problem,
 			SolverConfiguration solverConfig) {
 		switch (solverConfig.getDataFlowSolver()) {
+		case MergeContextFlowSensitive:
+			logger.info("Using merge-sensitive context- and flow-sensitive solver");
+			IInfoflowSolver mergeSolver = new MergeInfoflowSolver(problem, executor);
+			solverPeerGroup.addSolver(mergeSolver);
+			return mergeSolver;
 		case ContextFlowSensitive:
 			logger.info("Using context- and flow-sensitive solver");
 			InfoflowSolver infoflowSolver = new InfoflowSolver(problem, executor);

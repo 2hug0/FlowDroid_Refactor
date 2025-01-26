@@ -4,7 +4,7 @@ import soot.FastHierarchy;
 import soot.jimple.infoflow.InfoflowConfiguration;
 import soot.jimple.infoflow.InfoflowManager;
 import soot.jimple.infoflow.globalTaints.GlobalTaintManager;
-import soot.jimple.infoflow.solver.mergeSolver.solver.InfoflowSolver;
+import soot.jimple.infoflow.solver.mergeSolver.solver.MergeInfoflowSolver;
 import soot.jimple.infoflow.solver.IInfoflowSolver;
 import soot.jimple.infoflow.solver.cfg.IInfoflowCFG;
 import soot.jimple.infoflow.sourcesSinks.manager.ISourceSinkManager;
@@ -14,7 +14,7 @@ public class MergeInfoflowManager extends InfoflowManager {
 
 	protected final ActivationUnitManager activationUnitManager;
 
-	public MergeInfoflowManager(InfoflowConfiguration config, InfoflowSolver forwardSolver, IInfoflowCFG icfg,
+	public MergeInfoflowManager(InfoflowConfiguration config, MergeInfoflowSolver forwardSolver, IInfoflowCFG icfg,
 			ISourceSinkManager sourceSinkManager, ITaintPropagationWrapper taintWrapper, FastHierarchy hierarchy,
 			GlobalTaintManager globalTaintManager, ActivationUnitManager activationUnitManager) {
 		super(config, forwardSolver, icfg, sourceSinkManager, taintWrapper, hierarchy, globalTaintManager);

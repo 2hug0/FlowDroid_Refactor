@@ -38,7 +38,7 @@ import soot.jimple.infoflow.solver.functions.SolverReturnFlowFunction;
  * edges containing new taint information
  * 
  */
-public class InfoflowSolver extends IFDSSolver<Unit, Abstraction, IInfoflowCFG>
+public class MergeInfoflowSolver extends IFDSSolver<Unit, Abstraction, IInfoflowCFG>
 		implements IInfoflowSolver {
 
 	protected IFollowReturnsPastSeedsHandler followReturnsPastSeedsHandler = null;
@@ -47,7 +47,7 @@ public class InfoflowSolver extends IFDSSolver<Unit, Abstraction, IInfoflowCFG>
 
 	protected ISolverPeerGroup peerGroup = null;
 
-	public InfoflowSolver(AbstractInfoflowProblem problem, InterruptableExecutor executor) {
+	public MergeInfoflowSolver(AbstractInfoflowProblem problem, InterruptableExecutor executor) {
 		super(problem);
 		this.problem = problem;
 		this.executor = executor;

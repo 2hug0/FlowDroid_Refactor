@@ -16,7 +16,7 @@ import com.google.common.cache.LoadingCache;
 import soot.SootMethod;
 import soot.Unit;
 import soot.jimple.infoflow.data.Abstraction;
-import soot.jimple.infoflow.solver.mergeSolver.solver.InfoflowSolver;
+import soot.jimple.infoflow.solver.mergeSolver.solver.MergeInfoflowSolver;
 import soot.jimple.infoflow.solver.IInfoflowSolver;
 import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
 
@@ -26,7 +26,7 @@ public class ActivationUnitManager {
 
 	protected final Unit inactiveSymbol;
 
-	protected InfoflowSolver forwardSolver;
+	protected MergeInfoflowSolver forwardSolver;
 
 	protected final Map<Symbol, Map<Abstraction, Map<Unit, Map<Abstraction, Abstraction>>>> symbolIncoming;
 
@@ -157,7 +157,7 @@ public class ActivationUnitManager {
 	}
 
 	public void setForwardSolver(IInfoflowSolver solver) {
-		this.forwardSolver = (InfoflowSolver) solver;
+		this.forwardSolver = (MergeInfoflowSolver) solver;
 	}
 
 	public void cleanup() {
