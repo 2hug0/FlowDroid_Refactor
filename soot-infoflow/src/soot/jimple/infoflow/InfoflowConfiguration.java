@@ -146,6 +146,11 @@ public class InfoflowConfiguration {
 		 * Use the fine-grained GC solver
 		 */
 		FineGrainedGC,
+
+		/**
+		 * Use the merge solver
+		 */
+		MergeContextFlowSensitive,
 	}
 
 	/**
@@ -1017,7 +1022,7 @@ public class InfoflowConfiguration {
 	 * @author Steven Arzt
 	 */
 	public static class SolverConfiguration {
-		private DataFlowSolver dataFlowSolver = DataFlowSolver.ContextFlowSensitive;
+		private DataFlowSolver dataFlowSolver = DataFlowSolver.MergeContextFlowSensitive;
 		private SparsePropagationStrategy sparsePropagationStrategy = SparsePropagationStrategy.Precise;
 		private int maxJoinPointAbstractions = 10;
 		private int maxCalleesPerCallSite = 75;

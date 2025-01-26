@@ -16,6 +16,7 @@ package soot.jimple.infoflow.solver.fastSolver;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.concurrent.atomic.LongAdder;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -115,8 +116,8 @@ public class IFDSSolver<N, D extends FastSolverLinkedNode<D, N>, I extends BiDiI
 	@DontSynchronize("only used by single thread")
 	protected final Map<N, Set<D>> initialSeeds;
 
-	@DontSynchronize("benign races")
-	public long propagationCount;
+	@DontSynchronize("thread safe data structure, only modified internally")
+	public LongAdder propagationCount;
 
 	@DontSynchronize("stateless")
 	protected final D zeroValue;
@@ -283,7 +284,8 @@ public class IFDSSolver<N, D extends FastSolverLinkedNode<D, N>, I extends BiDiI
 		else {
 			LocalWorklistTask.scheduleLocal(task);
 		}
-		propagationCount++;
+		//propagationCount++;
+		propagationCount.increment();
 	}
 
 	/**

@@ -13,6 +13,7 @@ import java.io.File;
 
 import soot.Unit;
 import soot.jimple.Stmt;
+import soot.jimple.infoflow.InfoflowConfiguration.DataFlowSolver;
 import soot.jimple.infoflow.InfoflowConfiguration.SolverConfiguration;
 import soot.jimple.infoflow.aliasing.FlowSensitiveAliasStrategy;
 import soot.jimple.infoflow.aliasing.IAliasingStrategy;
@@ -91,6 +92,8 @@ public class Infoflow extends AbstractInfoflow {
 	@Override
 	protected InfoflowManager initializeInfoflowManager(final ISourceSinkManager sourcesSinks, IInfoflowCFG iCfg,
 			GlobalTaintManager globalTaintManager) {
+		if (config.getSolverConfiguration().getDataFlowSolver() == DataFlowSolver.MergeContextFlowSensitive)
+			return new soot.jimple.infoflow.solver.mergeSolver.MergeInfoflowManager(config, null, iCfg, sourcesSinks, taintWrapper, hierarchy, globalTaintManager, null);
 		return new InfoflowManager(config, null, iCfg, sourcesSinks, taintWrapper, hierarchy, globalTaintManager);
 	}
 
@@ -150,6 +153,9 @@ public class Infoflow extends AbstractInfoflow {
 
 	@Override
 	protected InfoflowProblem createInfoflowProblem(Abstraction zeroValue) {
+		if (config.getSolverConfiguration().getDataFlowSolver() == DataFlowSolver.MergeContextFlowSensitive){
+			return new soot.jimple.infoflow.solver.mergeSolver.problems.MergeInfoflowProblem(manager, zeroValue, reverseRuleManagerFactory);
+		}		
 		return new InfoflowProblem(manager, zeroValue, ruleManagerFactory);
 	}
 
