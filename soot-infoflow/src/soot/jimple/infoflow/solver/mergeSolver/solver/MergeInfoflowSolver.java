@@ -17,7 +17,6 @@ import heros.FlowFunction;
 import heros.solver.PathEdge;
 import soot.SootMethod;
 import soot.Unit;
-import soot.jimple.infoflow.solver.mergeSolver.MergeInfoflowManager;
 import soot.jimple.infoflow.solver.mergeSolver.ActivationUnitManager;
 import soot.jimple.infoflow.collect.MyConcurrentHashMap;
 import soot.jimple.infoflow.data.Abstraction;
@@ -53,7 +52,7 @@ public class MergeInfoflowSolver extends IFDSSolver<Unit, Abstraction, IInfoflow
 		this.executor = executor;
 		problem.setSolver(this);
 
-		this.manager = ((MergeInfoflowManager) problem.getManager()).getActivationUnitManager();
+		this.manager = problem.getManager().getActivationUnitManager();
 	}
 
 	@Override

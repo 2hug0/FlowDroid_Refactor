@@ -91,9 +91,7 @@ public class Infoflow extends AbstractInfoflow {
 
 	@Override
 	protected InfoflowManager initializeInfoflowManager(final ISourceSinkManager sourcesSinks, IInfoflowCFG iCfg,
-			GlobalTaintManager globalTaintManager) {
-		if (config.getSolverConfiguration().getDataFlowSolver() == DataFlowSolver.MergeContextFlowSensitive)
-			return new soot.jimple.infoflow.solver.mergeSolver.MergeInfoflowManager(config, null, iCfg, sourcesSinks, taintWrapper, hierarchy, globalTaintManager, null);
+			GlobalTaintManager globalTaintManager) {		
 		return new InfoflowManager(config, null, iCfg, sourcesSinks, taintWrapper, hierarchy, globalTaintManager);
 	}
 

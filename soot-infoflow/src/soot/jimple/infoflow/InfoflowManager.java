@@ -9,6 +9,7 @@ import soot.jimple.infoflow.memory.IMemoryBoundedSolver;
 import soot.jimple.infoflow.river.IUsageContextProvider;
 import soot.jimple.infoflow.solver.IInfoflowSolver;
 import soot.jimple.infoflow.solver.cfg.IInfoflowCFG;
+import soot.jimple.infoflow.solver.mergeSolver.ActivationUnitManager;
 import soot.jimple.infoflow.sourcesSinks.manager.ISourceSinkManager;
 import soot.jimple.infoflow.taintWrappers.ITaintPropagationWrapper;
 import soot.jimple.infoflow.typing.TypeUtils;
@@ -38,6 +39,8 @@ public class InfoflowManager {
 	private Aliasing aliasing;
 	// The infoflow manager for the on-demand analysis that computes additional flows
 	public InfoflowManager additionalManager;
+	//merge activation unit manager
+	protected final ActivationUnitManager activationUnitManager;
 
 	private IUsageContextProvider usageContextProvider;
 
@@ -54,6 +57,7 @@ public class InfoflowManager {
 		this.globalTaintManager = null;
 		this.additionalManager = null;
 		this.usageContextProvider = null;
+		this.activationUnitManager = null;
 	}
 
 	protected InfoflowManager(InfoflowConfiguration config, IInfoflowSolver mainSolver, IInfoflowCFG icfg,
@@ -70,6 +74,7 @@ public class InfoflowManager {
 		this.accessPathFactory = new AccessPathFactory(config, typeUtils);
 		this.globalTaintManager = globalTaintManager;
 		this.usageContextProvider = null;
+		this.activationUnitManager = new ActivationUnitManager(icfg);
 	}
 
 	protected InfoflowManager(InfoflowConfiguration config, IInfoflowSolver mainSolver, IInfoflowCFG icfg,
@@ -86,6 +91,7 @@ public class InfoflowManager {
 		this.accessPathFactory = existingManager.getAccessPathFactory();
 		this.globalTaintManager = existingManager.getGlobalTaintManager();
 		this.usageContextProvider = null;
+		this.activationUnitManager = existingManager.getActivationUnitManager();
 	}
 
 	public InfoflowManager(InfoflowConfiguration config, IInfoflowSolver mainSolver, IInfoflowCFG icfg) {
@@ -100,6 +106,7 @@ public class InfoflowManager {
 		this.accessPathFactory = new AccessPathFactory(config, typeUtils);
 		this.globalTaintManager = null;
 		this.usageContextProvider = null;
+		this.activationUnitManager = null;
 	}
 
 	/**
@@ -112,12 +119,22 @@ public class InfoflowManager {
 	}
 
 	/**
+	 * Gets the activation unit manager for this data flow analysis
+	 * 
+	 * @return The activation unit manager for this data flow
+	 */
+	public ActivationUnitManager getActivationUnitManager() {
+		return activationUnitManager;
+	}
+
+	/**
 	 * Sets the IFDS solver that propagates edges in the main direction
 	 * 
 	 * @param solver The IFDS solver that propagates edges in the main direction
 	 */
 	public void setMainSolver(IInfoflowSolver solver) {
-		this.mainSolver = solver;
+		this.mainSolver = solver;		
+		activationUnitManager.setForwardSolver(solver);		
 	}
 
 	/**
