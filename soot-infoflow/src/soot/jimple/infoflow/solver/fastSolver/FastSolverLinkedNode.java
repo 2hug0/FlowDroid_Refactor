@@ -3,7 +3,7 @@ package soot.jimple.infoflow.solver.fastSolver;
 import soot.Unit;
 import soot.jimple.infoflow.data.Abstraction;
 import soot.jimple.infoflow.data.accessPaths.ConcolicUnit;
-import soot.jimple.infoflow.solver.mergeSolver.Symbol;
+import soot.jimple.infoflow.solver.mergeSolver.unithandling.Symbol;
 
 /**
  * Common interface for all abstractions processed by the IFDS solver

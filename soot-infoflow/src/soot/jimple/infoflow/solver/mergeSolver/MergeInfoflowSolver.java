@@ -1,20 +1,212 @@
 package soot.jimple.infoflow.solver.mergeSolver;
 
-import soot.jimple.infoflow.InfoflowManager;
+import soot.jimple.infoflow.solver.fastSolver.InfoflowSolver;
+import soot.jimple.infoflow.solver.mergeSolver.unithandling.ActivationUnitManager;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Set;
+import java.util.function.Consumer;
+
+import heros.FlowFunction;
+import heros.solver.PathEdge;
+import soot.SootMethod;
+import soot.Unit;
 import soot.jimple.infoflow.data.Abstraction;
 import soot.jimple.infoflow.problems.AbstractInfoflowProblem;
-import soot.jimple.infoflow.problems.InfoflowProblem;
-import soot.jimple.infoflow.problems.rules.IPropagationRuleManagerFactory;
+import soot.jimple.infoflow.solver.IncomingRecord;
 import soot.jimple.infoflow.solver.executors.InterruptableExecutor;
-import soot.jimple.infoflow.solver.fastSolver.InfoflowSolver;
 
-public class MergeInfoflowSolver extends InfoflowProblem{
+public class MergeInfoflowSolver extends InfoflowSolver{
+    
+    private final ActivationUnitManager activationUnitManager;
 
-    protected final MergeInfoflowManager manager;
-
-    public MergeInfoflowProblem(InfoflowManager manager, Abstraction zeroValue, IPropagationRuleManagerFactory ruleManagerFactory) {
-		super(manager, zeroValue, ruleManagerFactory);
-
-        this.manager = (MergeInfoflowManager) manager;
+    public MergeInfoflowSolver(AbstractInfoflowProblem problem, InterruptableExecutor executor,
+                               ActivationUnitManager activationUnitManager){
+        super(problem, executor);        
+        this.activationUnitManager = new ActivationUnitManager(icfg);
     }
+
+    @Override
+	protected void processCall(PathEdge<Unit, Abstraction> edge) {
+		final Abstraction d1 = edge.factAtSource();
+		final Unit n = edge.getTarget(); // a call node; line 14...
+
+		final Abstraction d2 = edge.factAtTarget();
+		assert d2 != null;
+		Collection<Unit> returnSiteNs = icfg.getReturnSitesOfCallAt(n);
+
+		// for each possible callee
+		Collection<SootMethod> callees = icfg.getCalleesOfCallAt(n);
+		if (callees != null && !callees.isEmpty()) {
+			if (maxCalleesPerCallSite < 0 || callees.size() <= maxCalleesPerCallSite) {
+				callees.forEach(new Consumer<SootMethod>() {
+
+					@Override
+					public void accept(SootMethod sCalledProcN) {
+						// Concrete and early termination check
+						if (!sCalledProcN.isConcrete() || killFlag != null)
+							return;	
+
+						// compute the call-flow function
+						FlowFunction<Abstraction> function = flowFunctions.getCallFlowFunction(n, sCalledProcN);
+						Set<Abstraction> res = computeCallFlowFunction(function, d1, d2);
+
+						if (res != null && !res.isEmpty()) {
+							Collection<Unit> startPointsOf = icfg.getStartPointsOf(sCalledProcN);
+							// for each result node of the call-flow function
+							for (Abstraction d3 : res) {
+								if (memoryManager != null)
+									d3 = memoryManager.handleGeneratedMemoryObject(d2, d3);
+								if (d3 == null)
+									continue;
+
+								// for each callee's start point(s)
+								for (Unit sP : startPointsOf) {
+									// create initial self-loop
+									schedulingStrategy.propagateCallFlow(d3, sP, d3, n, false); // line 15
+								}
+
+								// register the fact that <sp,d3> has an incoming edge from
+								// <n,d2>
+								// line 15.1 of Naeem/Lhotak/Rodriguez
+								if (!addIncoming(sCalledProcN, d3, n, d1, d2))
+									continue;
+
+								applyEndSummaryOnCall(d1, n, d2, returnSiteNs, sCalledProcN, d3);
+							}
+						}
+					}
+
+				});
+			}
+		}
+
+		// line 17-19 of Naeem/Lhotak/Rodriguez
+		// process intra-procedural flows along call-to-return flow functions
+		for (Unit returnSiteN : returnSiteNs) {
+			FlowFunction<Abstraction> callToReturnFlowFunction = flowFunctions.getCallToReturnFlowFunction(n,
+					returnSiteN);
+			Set<Abstraction> res = computeCallToReturnFlowFunction(callToReturnFlowFunction, d1, d2);
+			if (res != null && !res.isEmpty()) {
+				for (Abstraction d3 : res) {
+					if (memoryManager != null)
+						d3 = memoryManager.handleGeneratedMemoryObject(d2, d3);
+					if (d3 != null)
+						schedulingStrategy.propagateCallToReturnFlow(d1, returnSiteN, d3, n, false);
+				}
+			}
+		}
+	}
+
+    @Override
+	protected void processExit(PathEdge<Unit, Abstraction> edge) {
+		final Unit n = edge.getTarget(); // an exit node; line 21...
+		SootMethod methodThatNeedsSummary = icfg.getMethodOf(n);
+
+		final Abstraction d1 = edge.factAtSource();
+		final Abstraction d2 = edge.factAtTarget();
+
+		// for each of the method's start points, determine incoming calls
+
+		// line 21.1 of Naeem/Lhotak/Rodriguez
+		// register end-summary
+		if (!addEndSummary(methodThatNeedsSummary, d1, n, d2))
+			return;
+		Set<IncomingRecord> inc = incoming(d1, methodThatNeedsSummary);
+
+		// for each incoming call edge already processed
+		// (see processCall(..))
+		for (IncomingRecord entry : inc) {
+			// Early termination check
+			if (killFlag != null)
+				return;
+
+			// line 22
+			Unit c = entry.n;
+			Set<Abstraction> callerSideDs = Collections.singleton(entry.d1);
+			// for each return site
+			for (Unit retSiteC : icfg.getReturnSitesOfCallAt(c)) {
+				// compute return-flow function
+				FlowFunction<Abstraction> retFunction = flowFunctions.getReturnFlowFunction(c, methodThatNeedsSummary,
+						n, retSiteC);
+				Set<Abstraction> targets = computeReturnFlowFunction(retFunction, d1, d2, c, callerSideDs);
+				// for each incoming-call value
+				if (targets != null && !targets.isEmpty()) {
+					final Abstraction d4 = entry.d1;
+					final Abstraction predVal = entry.d2;
+
+					for (Abstraction d5 : targets) {
+						if (memoryManager != null)
+							d5 = memoryManager.handleGeneratedMemoryObject(d2, d5);
+						if (d5 == null)
+							continue;
+
+						// If we have not changed anything in the callee, we do not need the facts from
+						// there. Even if we change something: If we don't need the concrete path, we
+						// can skip the callee in the predecessor chain
+						Abstraction d5p = shortenPredecessors(d5, predVal, d1, n, c);
+						schedulingStrategy.propagateReturnFlow(d4, retSiteC, d5p, c, false);
+					}
+				}
+			}
+
+			// Make sure all of the incoming edges are registered with the edge from the new
+			// summary
+			d1.addNeighbor(entry.d3);
+		}
+
+		// handling for unbalanced problems where we return out of a method with
+		// a fact for which we have no incoming flow
+		// note: we propagate that way only values that originate from ZERO, as
+		// conditionally generated values should only be propagated into callers that
+		// have an incoming edge for this condition
+		if (followReturnsPastSeeds && d1 == zeroValue && (inc == null || inc.isEmpty())) {
+			Collection<Unit> callers = icfg.getCallersOf(methodThatNeedsSummary);
+			for (Unit c : callers) {
+				for (Unit retSiteC : icfg.getReturnSitesOfCallAt(c)) {
+					FlowFunction<Abstraction> retFunction = flowFunctions.getReturnFlowFunction(c,
+							methodThatNeedsSummary, n, retSiteC);
+					Set<Abstraction> targets = computeReturnFlowFunction(retFunction, d1, d2, c,
+							Collections.singleton(zeroValue));
+					if (targets != null && !targets.isEmpty()) {
+						for (Abstraction d5 : targets) {
+							if (memoryManager != null)
+								d5 = memoryManager.handleGeneratedMemoryObject(d2, d5);
+							if (d5 != null)
+								schedulingStrategy.propagateReturnFlow(zeroValue, retSiteC, d5, c, true);
+						}
+					}
+				}
+			}
+			// in cases where there are no callers, the return statement would
+			// normally not be processed at all; this might be undesirable if the flow
+			// function has a side effect such as registering a taint; instead we thus call
+			// the return flow function will a null caller
+			if (callers.isEmpty()) {
+				FlowFunction<Abstraction> retFunction = flowFunctions.getReturnFlowFunction(null,
+						methodThatNeedsSummary, n, null);
+				retFunction.computeTargets(d2);
+			}
+		}
+	}
+
+    @Override
+	protected void processExit(PathEdge<Unit, Abstraction> edge) {
+		super.processExit(edge);
+
+		if (followReturnsPastSeeds && followReturnsPastSeedsHandler != null) {
+			final Abstraction d1 = edge.factAtSource();
+			final Unit u = edge.getTarget();
+			final Abstraction d2 = edge.factAtTarget();
+
+			final SootMethod methodThatNeedsSummary = icfg.getMethodOf(u);
+			final Set<IncomingRecord> inc = incoming(d1, methodThatNeedsSummary);
+
+			if (inc == null || inc.isEmpty())
+				followReturnsPastSeedsHandler.handleFollowReturnsPastSeeds(d1, u, d2);
+		}
+	}
+
+
 }

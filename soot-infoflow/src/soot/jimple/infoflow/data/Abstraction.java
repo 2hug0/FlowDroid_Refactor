@@ -26,8 +26,8 @@ import soot.jimple.infoflow.collect.AtomicBitSet;
 import soot.jimple.infoflow.data.accessPaths.ConcolicUnit;
 import soot.jimple.infoflow.solver.cfg.IInfoflowCFG.UnitContainer;
 import soot.jimple.infoflow.solver.fastSolver.FastSolverLinkedNode;
+import soot.jimple.infoflow.solver.mergeSolver.unithandling.Symbol;
 import soot.jimple.infoflow.sourcesSinks.definitions.ISourceSinkDefinition;
-import soot.jimple.infoflow.solver.mergeSolver.Symbol;
 
 /**
  * The abstraction class contains all information that is necessary to track the

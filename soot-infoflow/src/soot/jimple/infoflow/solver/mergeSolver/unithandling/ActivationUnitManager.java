@@ -1,7 +1,6 @@
-package soot.jimple.infoflow.solver.mergeSolver;
+package soot.jimple.infoflow.solver.mergeSolver.unithandling;
 
 import soot.jimple.infoflow.data.accessPaths.ConcolicUnit;
-import soot.jimple.infoflow.solver.mergeSolver.Symbol;
 import soot.jimple.infoflow.data.Abstraction;
 import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
 
@@ -18,16 +17,14 @@ import soot.Unit;
 
 public class ActivationUnitManager {
 
-    protected final BiDiInterproceduralCFG<Unit, SootMethod> icfg;
-    protected final Symbol GAS;
+    protected final BiDiInterproceduralCFG<Unit, SootMethod> icfg;    
 
     protected final ConcurrentHashMap<Symbol, Set<Unit>> symb2Reps = new ConcurrentHashMap<>();    
     protected final ConcurrentHashMap<Symbol, Set<SymbolIncomingEntry>> symbolIncoming = new ConcurrentHashMap<>();
 
 
     public ActivationUnitManager(BiDiInterproceduralCFG<Unit, SootMethod> icfg) {		
-		this.icfg = icfg;
-        this.GAS = Symbol.GAS;		
+		this.icfg = icfg;        	
 	}
 
     // 
@@ -120,7 +117,7 @@ public class ActivationUnitManager {
 
         // Line 81: activationStmt concrete or GAS -> return d3
         if (activationStmt.isConcrete() || activationStmt.getSymbol() == Symbol.GAS) {
-        return Collections.singleton(d3);    
+            return Collections.singleton(d3);    
         }      
         
         // Line 82: activationStmt must be symbolic

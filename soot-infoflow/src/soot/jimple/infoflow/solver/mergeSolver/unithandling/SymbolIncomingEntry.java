@@ -1,4 +1,4 @@
-package soot.jimple.infoflow.solver.mergeSolver;
+package soot.jimple.infoflow.solver.mergeSolver.unithandling;
 
 import java.util.Objects;
 

@@ -3,7 +3,7 @@ package soot.jimple.infoflow.data.accessPaths;
 import java.util.Objects;
 
 import soot.Unit;
-import soot.jimple.infoflow.solver.mergeSolver.Symbol;
+import soot.jimple.infoflow.solver.mergeSolver.unithandling.Symbol;
 
 /**
  * A concolic unit can either represent a normal unit or refer to any unit
