@@ -3,6 +3,7 @@ package soot.jimple.infoflow.solver.fastSolver;
 import soot.Unit;
 import soot.jimple.infoflow.data.Abstraction;
 import soot.jimple.infoflow.data.accessPaths.ConcolicUnit;
+import soot.jimple.infoflow.solver.mergeSolver.Symbol;
 
 /**
  * Common interface for all abstractions processed by the IFDS solver
@@ -72,6 +73,6 @@ public interface FastSolverLinkedNode extends Cloneable {
 
 	public ConcolicUnit getConcolicActivationUnit();
 
-	public Abstraction makeActivationUnitSymbolic();
+	public Abstraction makeActivationUnitSymbolic(Symbol symbol);
 
 }

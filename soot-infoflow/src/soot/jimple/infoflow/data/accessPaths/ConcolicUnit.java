@@ -3,6 +3,7 @@ package soot.jimple.infoflow.data.accessPaths;
 import java.util.Objects;
 
 import soot.Unit;
+import soot.jimple.infoflow.solver.mergeSolver.Symbol;
 
 /**
  * A concolic unit can either represent a normal unit or refer to any unit
@@ -14,6 +15,7 @@ import soot.Unit;
 public class ConcolicUnit {
 
 	protected final Unit unit;
+	protected Symbol symbol = null;
 
 	/**
 	 * Instantiates a new {@link ConcolicUnit} with a concrete unit
@@ -22,13 +24,15 @@ public class ConcolicUnit {
 	 */
 	public ConcolicUnit(Unit unit) {
 		this.unit = unit;
+		this.symbol = null;
 	}
 
 	/**
 	 * Instantiates a new {@link ConcolicUnit} as symbolic
 	 */
-	public ConcolicUnit() {
+	public ConcolicUnit(Symbol symbol) {
 		this.unit = null;
+		this.symbol = symbol;
 	}
 
 	/**
@@ -62,9 +66,41 @@ public class ConcolicUnit {
 		return this.unit;
 	}
 
+	/**
+     * Gets the symbolic representation of this unit.
+     *
+     * @return The symbol if this unit is symbolic, otherwise <code>null</code>.
+     */
+    public Symbol getSymbol() {
+        return this.symbol;
+    }
+
+	/**
+     * Sets the symbol for a symbolic unit. Throws an exception if the unit is concrete.
+     *
+     * @param symbol The symbol to set
+     * @throws IllegalStateException If the unit is concrete
+     */
+    public void setSymbol(Symbol symbol) {
+        if (!isSymbolic()) {
+            throw new IllegalStateException("Cannot set a symbol for a concrete unit.");
+        }
+        this.symbol = symbol;
+    }
+	
+	/*public String toStringUnit() {
+		return isConcrete() ? unit.toString() : "<symb>";
+	} */
+
 	@Override
 	public String toString() {
-		return isConcrete() ? unit.toString() : "<symb>";
+		if (isConcrete()) {
+			return "ConcolicUnit { unit=" + unit.toString() + " }";
+		} else if (symbol != null) {
+			return "ConcolicUnit { symbolic=" + symbol.toString() + " }";
+		} else {
+			return "ConcolicUnit { symbolic=<null> and unit=<null> -> no ConcolicUnit }";
+		}
 	}
 
 	@Override
@@ -85,3 +121,8 @@ public class ConcolicUnit {
 	}
 
 }
+
+
+
+
+
