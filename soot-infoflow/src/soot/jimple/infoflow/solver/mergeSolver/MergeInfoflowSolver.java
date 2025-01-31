@@ -191,7 +191,7 @@ public class MergeInfoflowSolver extends InfoflowSolver{
 		}
 	}
 
-    @Override
+    /*@Override
 	protected void processExit(PathEdge<Unit, Abstraction> edge) {
 		super.processExit(edge);
 
@@ -206,7 +206,7 @@ public class MergeInfoflowSolver extends InfoflowSolver{
 			if (inc == null || inc.isEmpty())
 				followReturnsPastSeedsHandler.handleFollowReturnsPastSeeds(d1, u, d2);
 		}
-	}
+	}*/
 
 
 }
