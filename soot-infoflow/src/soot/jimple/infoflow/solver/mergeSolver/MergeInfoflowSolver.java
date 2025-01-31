@@ -14,8 +14,10 @@ import soot.SootMethod;
 import soot.Unit;
 import soot.jimple.infoflow.data.Abstraction;
 import soot.jimple.infoflow.problems.AbstractInfoflowProblem;
+import soot.jimple.infoflow.solver.EndSummary;
 import soot.jimple.infoflow.solver.IncomingRecord;
 import soot.jimple.infoflow.solver.executors.InterruptableExecutor;
+import soot.jimple.infoflow.solver.mergeSolver.unithandling.ActivationUnitManager;
 
 public class MergeInfoflowSolver extends InfoflowSolver{
     
@@ -98,9 +100,8 @@ public class MergeInfoflowSolver extends InfoflowSolver{
 			}
 		}
 	}
-
-    @Override
-	protected void processExit(PathEdge<Unit, Abstraction> edge) {
+    
+	protected void processExitWithMerge(PathEdge<Unit, Abstraction> edge) {
 		final Unit n = edge.getTarget(); // an exit node; line 21...
 		SootMethod methodThatNeedsSummary = icfg.getMethodOf(n);
 
@@ -146,6 +147,8 @@ public class MergeInfoflowSolver extends InfoflowSolver{
 						// there. Even if we change something: If we don't need the concrete path, we
 						// can skip the callee in the predecessor chain
 						Abstraction d5p = shortenPredecessors(d5, predVal, d1, n, c);
+						// Differnce to Naeem/Lhotak/Rodriguez: We need to attach the activation
+						d5p = activationUnitManager.attachActivationStmt(predVal, d5p);
 						schedulingStrategy.propagateReturnFlow(d4, retSiteC, d5p, c, false);
 					}
 				}
@@ -174,6 +177,8 @@ public class MergeInfoflowSolver extends InfoflowSolver{
 							if (memoryManager != null)
 								d5 = memoryManager.handleGeneratedMemoryObject(d2, d5);
 							if (d5 != null)
+								// Difference to Naeem/Lhotak/Rodriguez: We need to attach the activation
+								d5 = activationUnitManager.attachActivationStmt(null, d5);
 								schedulingStrategy.propagateReturnFlow(zeroValue, retSiteC, d5, c, true);
 						}
 					}
@@ -191,9 +196,9 @@ public class MergeInfoflowSolver extends InfoflowSolver{
 		}
 	}
 
-    /*@Override
+    @Override
 	protected void processExit(PathEdge<Unit, Abstraction> edge) {
-		super.processExit(edge);
+		processExitWithMerge(edge);
 
 		if (followReturnsPastSeeds && followReturnsPastSeedsHandler != null) {
 			final Abstraction d1 = edge.factAtSource();
@@ -206,7 +211,58 @@ public class MergeInfoflowSolver extends InfoflowSolver{
 			if (inc == null || inc.isEmpty())
 				followReturnsPastSeedsHandler.handleFollowReturnsPastSeeds(d1, u, d2);
 		}
-	}*/
+	}
+
+	
+	@Override
+	protected void applyEndSummaryOnCall(final Abstraction d1, final Unit n, final Abstraction d2,
+			Collection<Unit> returnSiteNs, SootMethod sCalledProcN, Abstraction d3) {
+		// line 15.2
+		Set<EndSummary> endSumm = endSummary(sCalledProcN, d3);
+
+		// still line 15.2 of Naeem/Lhotak/Rodriguez
+		// for each already-queried exit value <eP,d4> reachable
+		// from <sP,d3>, create new caller-side jump functions to
+		// the return sites because we have observed a potentially
+		// new incoming edge into <sP,d3>
+		if (endSumm != null && !endSumm.isEmpty()) {
+			for (EndSummary entry : endSumm) {
+				Unit eP = entry.eP;
+				Abstraction d4 = entry.d4;
+
+				// We must acknowledge the incoming abstraction from the other path
+				entry.calleeD1.addNeighbor(d3);
+
+				// for each return site
+				for (Unit retSiteN : returnSiteNs) {
+					// compute return-flow function
+					FlowFunction<Abstraction> retFunction = flowFunctions.getReturnFlowFunction(n, sCalledProcN, eP,
+							retSiteN);
+					Set<Abstraction> retFlowRes = computeReturnFlowFunction(retFunction, d3, d4, n,
+							Collections.singleton(d1));
+					if (retFlowRes != null && !retFlowRes.isEmpty()) {
+						// for each target value of the function
+						for (Abstraction d5 : retFlowRes) {
+							if (memoryManager != null)
+								d5 = memoryManager.handleGeneratedMemoryObject(d4, d5);
+
+							// If we have not changed anything in
+							// the callee, we do not need the facts from
+							// there. Even if we change something:
+							// If we don't need the concrete path,
+							// we can skip the callee in the predecessor
+							// chain
+							Abstraction d5p = shortenPredecessors(d5, d2, d3, eP, n);
+							// Difference to Naeem/Lhotak/Rodriguez: We need to attach the activation
+							d5p = activationUnitManager.attachActivationStmt(d2, d5p);
+							schedulingStrategy.propagateReturnFlow(d1, retSiteN, d5p, n, false);
+						}
+					}
+				}
+			}
+			onEndSummaryApplied(n, sCalledProcN, d3);
+		}
+	}
 
 
 }
