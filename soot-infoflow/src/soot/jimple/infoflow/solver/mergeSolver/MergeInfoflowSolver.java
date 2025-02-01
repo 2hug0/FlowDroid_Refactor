@@ -15,9 +15,9 @@ import soot.Unit;
 import soot.jimple.infoflow.data.Abstraction;
 import soot.jimple.infoflow.problems.AbstractInfoflowProblem;
 import soot.jimple.infoflow.solver.EndSummary;
+import soot.jimple.infoflow.solver.IInfoflowSolver;
 import soot.jimple.infoflow.solver.IncomingRecord;
 import soot.jimple.infoflow.solver.executors.InterruptableExecutor;
-import soot.jimple.infoflow.solver.mergeSolver.unithandling.ActivationUnitManager;
 
 public class MergeInfoflowSolver extends InfoflowSolver{
     
@@ -26,7 +26,7 @@ public class MergeInfoflowSolver extends InfoflowSolver{
     public MergeInfoflowSolver(AbstractInfoflowProblem problem, InterruptableExecutor executor,
                                ActivationUnitManager activationUnitManager){
         super(problem, executor);        
-        this.activationUnitManager = new ActivationUnitManager(icfg);
+        this.activationUnitManager = ((MergeInfoflowManager) problem.getManager()).getActivationUnitManager();
     }
 
     @Override
@@ -62,20 +62,24 @@ public class MergeInfoflowSolver extends InfoflowSolver{
 									d3 = memoryManager.handleGeneratedMemoryObject(d2, d3);
 								if (d3 == null)
 									continue;
+								PathEdge<Unit, Abstraction> edge = new PathEdge<>(d1, n, d2);
+								Set<Abstraction> abs = activationUnitManager.concretize(edge, sCalledProcN, d3, solverId);
+								for (Abstraction d0 : abs){
+									
+									// for each callee's start point(s)
+									for (Unit sP : startPointsOf) {
+										// create initial self-loop
+										schedulingStrategy.propagateCallFlow(d0, sP, d0, n, false); // line 15 d0 was d3
+									}
 
-								// for each callee's start point(s)
-								for (Unit sP : startPointsOf) {
-									// create initial self-loop
-									schedulingStrategy.propagateCallFlow(d3, sP, d3, n, false); // line 15
+									// register the fact that <sp,d3> has an incoming edge from
+									// <n,d2>
+									// line 15.1 of Naeem/Lhotak/Rodriguez
+									if (!addIncoming(sCalledProcN, d0, n, d1, d2)) // d0 was d3
+										continue;
+
+									applyEndSummaryOnCall(d1, n, d2, returnSiteNs, sCalledProcN, d0);
 								}
-
-								// register the fact that <sp,d3> has an incoming edge from
-								// <n,d2>
-								// line 15.1 of Naeem/Lhotak/Rodriguez
-								if (!addIncoming(sCalledProcN, d3, n, d1, d2))
-									continue;
-
-								applyEndSummaryOnCall(d1, n, d2, returnSiteNs, sCalledProcN, d3);
 							}
 						}
 					}
@@ -261,6 +265,20 @@ public class MergeInfoflowSolver extends InfoflowSolver{
 				}
 			}
 			onEndSummaryApplied(n, sCalledProcN, d3);
+		}
+	}
+
+	@Override
+	public void injectContext(IInfoflowSolver otherSolver, SootMethod callee, Abstraction d3, Unit callSite,
+							  Abstraction d2, Abstraction d1) {
+		PathEdge<Unit, Abstraction> edge = new PathEdge<>(d1, callSite, d2); 
+		Set<Abstraction> abs = activationUnitManager.concretize(edge, callee, d3, !solverId);
+		for (Abstraction d0 : abs){
+			if (!addIncoming(callee, d0, callSite, d1, d2)) // old d3 instead of d0
+				return;
+
+			Collection<Unit> returnSiteNs = icfg.getReturnSitesOfCallAt(callSite);
+			applyEndSummaryOnCall(d1, callSite, d2, returnSiteNs, callee, d0); // old d3 instead of d0
 		}
 	}
 

@@ -164,27 +164,7 @@ public class Abstraction implements Cloneable, FastSolverLinkedNode {
 		a.activationUnit = new ConcolicUnit(activationUnit);
 		a.dependsOnCutAP |= a.getAccessPath().isCutOffApproximation();
 		return a;
-	}
-
-
-	// Line e.g. 97 "DataAbstraction(d) || v"
-	public Abstraction deriveAbstractionChangeActivationStmt(Unit activationUnit){
-		Abstraction a = deriveNewAbstractionMutable(accessPath, null);
-		if (a == null)
-			return null;
-
-		a.postdominators = null;
-		a.dominator = null;
-		a.activationUnit = new ConcolicUnit(activationUnit);
-		a.dependsOnCutAP |= a.getAccessPath().isCutOffApproximation();
-		return a;
-	}
-
-	/*
-	// Line e.g. 77 "abs || sym" 
-	public Abstraction deriveAbstractionWithSymbol(Symbol symbol){
-		// look at makeActivationUnitSymbolic
-	}*/
+	}	
 
 	public Abstraction deriveNewAbstraction(AccessPath p, Stmt currentStmt) {
 		return deriveNewAbstraction(p, currentStmt, isImplicit);
@@ -300,14 +280,7 @@ public class Abstraction implements Cloneable, FastSolverLinkedNode {
 	@Override
 	public ConcolicUnit getConcolicActivationUnit() {
 		return this.activationUnit;
-	}
-
-	@Override
-	public Abstraction makeActivationUnitSymbolic(Symbol symbol) {
-		Abstraction abs = clone();
-		abs.activationUnit = new ConcolicUnit(symbol);
-		return abs;
-	}
+	}	
 
 	public Unit getTurnUnit() {
 		return this.turnUnit;
@@ -753,8 +726,24 @@ public class Abstraction implements Cloneable, FastSolverLinkedNode {
 		res.currentStmt = this.currentStmt;
 		return res;
 	}
+	
+	public Abstraction replaceActivationUnit(Unit activationStmt) {
+		Abstraction res = clone();				
+		res.activationUnit = new ConcolicUnit(activationStmt);
+		res.predecessor = this.predecessor;
+		res.currentStmt = this.currentStmt;
+		return res;
+	}
 
-	public Abstraction deriveSymbolicAbstraction(Unit activationUnit) {
+	public Abstraction replaceActivationUnit(Symbol symbol) {
+		Abstraction res = clone();				
+		res.activationUnit = new ConcolicUnit(symbol);
+		res.predecessor = this.predecessor;
+		res.currentStmt = this.currentStmt;
+		return res;
+	}
+
+	public Abstraction deriveSymbolicAbstraction(Symbol activationUnit) {
 		Abstraction res = new Abstraction(this.accessPath, null,
 				this.exceptionThrown, this.isImplicit);
 		res.dependsOnCutAP = this.dependsOnCutAP;
@@ -783,6 +772,34 @@ public class Abstraction implements Cloneable, FastSolverLinkedNode {
 		res.propagationPathLength = this.propagationPathLength + concAbs.propagationPathLength;
 		return res;
 	}
+
+	/* 
+	// Line e.g. 97 "DataAbstraction(d) || v"
+	public Abstraction deriveAbstractionChangeActivationStmt(Unit activationUnit){
+		Abstraction a = deriveNewAbstractionMutable(accessPath, null);
+		if (a == null)
+			return null;
+
+		a.postdominators = null;
+		a.dominator = null;
+		a.activationUnit = new ConcolicUnit(activationUnit);
+		a.dependsOnCutAP |= a.getAccessPath().isCutOffApproximation();
+		return a;
+	}
+
+	/*
+	// Line e.g. 77 "abs || sym" 
+	public Abstraction deriveAbstractionWithSymbol(Symbol symbol){
+		// look at makeActivationUnitSymbolic
+	}
+
+	@Override
+	public Abstraction makeActivationUnitSymbolic(Symbol symbol) {
+		Abstraction abs = clone();
+		abs.activationUnit = new ConcolicUnit(symbol);
+		return abs;
+	}
+	*/
 
 
 }

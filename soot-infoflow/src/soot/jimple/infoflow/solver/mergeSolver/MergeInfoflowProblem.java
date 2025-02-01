@@ -47,7 +47,6 @@ import soot.jimple.ReturnStmt;
 import soot.jimple.StaticFieldRef;
 import soot.jimple.Stmt;
 import soot.jimple.infoflow.InfoflowConfiguration.StaticFieldTrackingMode;
-import soot.jimple.infoflow.InfoflowManager;
 import soot.jimple.infoflow.aliasing.Aliasing;
 import soot.jimple.infoflow.callmappers.CallerCalleeManager;
 import soot.jimple.infoflow.callmappers.ICallerCalleeArgumentMapper;
@@ -70,9 +69,12 @@ import soot.jimple.infoflow.util.ByReferenceBoolean;
 
 public class MergeInfoflowProblem extends InfoflowProblem {
 
-	public MergeInfoflowProblem(InfoflowManager manager, Abstraction zeroValue,
+	protected final MergeInfoflowManager manager;
+
+	public MergeInfoflowProblem(MergeInfoflowManager manager, Abstraction zeroValue,
 			IPropagationRuleManagerFactory ruleManagerFactory) {
 		super(manager, zeroValue, ruleManagerFactory);
+		this.manager = manager;
 	}
 
 	@Override
@@ -552,7 +554,7 @@ public class MergeInfoflowProblem extends InfoflowProblem {
 						// this method, it will not get activated = it can be
 						// removed:
 						if (!newSource.isAbstractionActive() && newSource.getActivationUnit() != null)
-							if (interproceduralCFG().getMethodOf(newSource.getActivationUnit()) == callee)
+							if (manager.getActivationUnitManager().getMethodOf(newSource.getConcolicActivationUnit()) == callee)
 								return null;
 
 						ByReferenceBoolean killAll = new ByReferenceBoolean();

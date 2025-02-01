@@ -73,6 +73,6 @@ public interface FastSolverLinkedNode extends Cloneable {
 
 	public ConcolicUnit getConcolicActivationUnit();
 
-	public Abstraction makeActivationUnitSymbolic(Symbol symbol);
+	// public Abstraction makeActivationUnitSymbolic(Symbol symbol);
 
 }

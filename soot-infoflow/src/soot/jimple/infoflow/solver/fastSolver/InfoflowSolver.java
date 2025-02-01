@@ -178,4 +178,17 @@ public class InfoflowSolver extends IFDSSolver implements IInfoflowSolver {
 		// not required
 	}
 
+	public void enterMethod(Abstraction d1, Unit callSite, Abstraction d2, SootMethod callee, Abstraction d0) {
+		Collection<Unit> startPointsOf = icfg.getStartPointsOf(callee);
+		Collection<Unit> retSites = icfg.getReturnSitesOfCallAt(callSite);
+
+		for (Unit sP : startPointsOf)
+			propagate(d0, sP, d0, callSite, false, null);
+
+		if (!addIncoming(callee, d0, callSite, d1, d2))
+			return;
+
+		applyEndSummaryOnCall(d1, callSite, d2, retSites, callee, d0);
+	}
+
 }

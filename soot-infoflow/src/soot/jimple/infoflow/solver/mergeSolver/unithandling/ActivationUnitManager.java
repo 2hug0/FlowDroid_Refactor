@@ -1,6 +1,9 @@
 package soot.jimple.infoflow.solver.mergeSolver.unithandling;
 
 import soot.jimple.infoflow.data.accessPaths.ConcolicUnit;
+import soot.jimple.infoflow.solver.IInfoflowSolver;
+import soot.jimple.infoflow.solver.fastSolver.InfoflowSolver;
+import soot.jimple.infoflow.solver.mergeSolver.MergeInfoflowSolver;
 import soot.jimple.infoflow.data.Abstraction;
 import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
 
@@ -17,7 +20,8 @@ import soot.Unit;
 
 public class ActivationUnitManager {
 
-    protected final BiDiInterproceduralCFG<Unit, SootMethod> icfg;    
+    protected final BiDiInterproceduralCFG<Unit, SootMethod> icfg;   
+    protected MergeInfoflowSolver forwardSolver; 
 
     protected final ConcurrentHashMap<Symbol, Set<Unit>> symb2Reps = new ConcurrentHashMap<>();    
     protected final ConcurrentHashMap<Symbol, Set<SymbolIncomingEntry>> symbolIncoming = new ConcurrentHashMap<>();
@@ -27,10 +31,14 @@ public class ActivationUnitManager {
 		this.icfg = icfg;        	
 	}
 
+    public void setForwardSolver(IInfoflowSolver solver) {
+		this.forwardSolver = (MergeInfoflowSolver) solver;
+	}
+
     // 
-    public void addToSymb2Reps(Symbol symbol, Unit concreteActivationUnit) {
-        symb2Reps.computeIfAbsent(symbol, k -> Collections.newSetFromMap(new ConcurrentHashMap<>()))
-                 .add(concreteActivationUnit);
+    public boolean addToSymb2Reps(Symbol symbol, Unit concreteActivationUnit) {
+        return symb2Reps.computeIfAbsent(symbol, k -> Collections.newSetFromMap(new ConcurrentHashMap<>()))
+                 .add(concreteActivationUnit);                
     }
 
     public Set<Unit> getConcreteUnitsForSymbol(Symbol symbol) {
@@ -41,8 +49,8 @@ public class ActivationUnitManager {
         return symb2Reps.getOrDefault(symbol, Collections.emptySet()).contains(concreteActivationUnit);
     }
 
-    public void addToSymbolIncoming(Symbol symbol, PathEdge<Unit, Abstraction> pathEdge, Abstraction abstraction) {
-        symbolIncoming.computeIfAbsent(symbol, k -> Collections.newSetFromMap(new ConcurrentHashMap<>()))
+    public boolean addToSymbolIncoming(Symbol symbol, PathEdge<Unit, Abstraction> pathEdge, Abstraction abstraction) {
+        return symbolIncoming.computeIfAbsent(symbol, k -> Collections.newSetFromMap(new ConcurrentHashMap<>()))
                       .add(new SymbolIncomingEntry(pathEdge, abstraction));
     }
     
@@ -68,13 +76,16 @@ public class ActivationUnitManager {
         // Line 63 iterate over all PathEdges for symbol from symbolIncoming
         for (SymbolIncomingEntry entry : symbolIncoming.getOrDefault(symbol, Collections.emptySet())) {
 
-            PathEdge<Unit, Abstraction> pathEdge = entry.getPathEdge();
+            PathEdge<Unit, Abstraction> edge = entry.getPathEdge();
             Abstraction abs = entry.getAbstraction();
-
+            Abstraction d1 = edge.factAtSource();
+			Unit u = edge.getTarget();
+			Abstraction d2 = edge.factAtTarget();
             // Line 64 combine abstraction with concrete activationUnit
-            Abstraction d3 = abs.deriveAbstractionChangeActivationStmt(activationUnit);
+            Abstraction d3 = abs.replaceActivationUnit(activationUnit);
 
             // Line 65 propagate d3, d5 in extern method
+            forwardSolver.enterMethod(d1, u, d2, callee, d3);
                     
         }
     }   
@@ -82,32 +93,30 @@ public class ActivationUnitManager {
     // Lines 70-77
     public Abstraction symbolize(SootMethod callerSM, SootMethod calleeSM, Abstraction abstraction){
         // Line 71 get concrete activation unit
-        Unit activationUnit = abstraction.getActivationUnit();
+        final Unit activationUnit = abstraction.getActivationUnit();
 
-        // Line 72 clone abstraction
-        Abstraction resAbstraction = abstraction.clone();
-
+        // Line 72 clone abstraction happens in return method replaceActivationUnit
         // Line 73 create new symbol
         Symbol symbol = new Symbol(callerSM, calleeSM, abstraction);
 
-        // Line 74 check if activation unit is not already in symb2Reps
+        // Line 74 check if activation unit is already in symb2Reps
         if (!symb2Reps.getOrDefault(symbol, Collections.emptySet()).contains(activationUnit)){
 
             // Line 75 if not add activation unit to symb2Reps
-            symb2Reps.computeIfAbsent(symbol, k -> Collections.newSetFromMap(new ConcurrentHashMap<>()))
-                 .add(activationUnit);
+            if(addToSymb2Reps(symbol, activationUnit)){
 
-            // Line 76 call onActivationStmtAdded
-            onActivationStmtAdded(symbol, activationUnit);
+                // Line 76 call onActivationStmtAdded
+                onActivationStmtAdded(symbol, activationUnit);
+            }
         }
         
         // Line 77 return abstraction with symbolic activation unit
-        return resAbstraction = resAbstraction.makeActivationUnitSymbolic(symbol);
+        return abstraction.replaceActivationUnit(symbol);
 
     }
 
     // Lines 78-92
-    public Set<Abstraction> conretize(PathEdge<Unit, Abstraction> edge, SootMethod callee, Abstraction d3){
+    public Set<Abstraction> concretize(PathEdge<Unit, Abstraction> edge, SootMethod callee, Abstraction d3, boolean solverID){
         // Line 79 Abstraction is active if activationUnit (ConcolicUnit) == null
         if(d3.isAbstractionActive()){
             return Collections.singleton(d3);
@@ -115,7 +124,13 @@ public class ActivationUnitManager {
         // Line 80: activationStmt (ConcolicUnit) of d3
         ConcolicUnit activationStmt = d3.getConcolicActivationUnit();
 
-        // Line 81: activationStmt concrete or GAS -> return d3
+        if (!solverID) {
+			if (activationStmt.getSymbol() == Symbol.GAS)
+				return Collections.singleton(d3);
+			return Collections.singleton(d3.deriveSymbolicAbstraction(Symbol.GAS));
+		}
+
+        // Line 81: concrete activationStmt or GAS -> return d3
         if (activationStmt.isConcrete() || activationStmt.getSymbol() == Symbol.GAS) {
             return Collections.singleton(d3);    
         }      
@@ -124,35 +139,32 @@ public class ActivationUnitManager {
         assert d3.getConcolicActivationUnit().isSymbolic();
 
         // Line 83: extract Symbol
-        Symbol symbolD3 = d3.getConcolicActivationUnit().getSymbol();
+        Symbol symbol_d3 = d3.getConcolicActivationUnit().getSymbol();
 
         // Line 84 Set of represented facts (Abstractions)
         Set<Abstraction> representedFacts = new HashSet<>();
 
-        // Line 85: new Abstraction of d3
-        Abstraction absD3 = d3.clone();
-
+        // Line 85: new Abstraction of d3 is processed in "deriveAbstraction..." methods
         Unit callSiteUnit = edge.getTarget();         
-        SootMethod caller = icfg.getMethodOf(callSiteUnit);
-        // SootMethod callee = icfg.getCalleesOfCallAt(callSiteUnit).iterator().next();
+        SootMethod caller = icfg.getMethodOf(callSiteUnit);        
 
         // Line 86 check if context matches
-        if(symbolD3.matchContext(caller, callee)){
+        if(solverID && symbol_d3.matchContext(caller, callee)){
 
             // Line 87 save PathEdge and Abstraction in symbolIncoming
-            symbolIncoming.computeIfAbsent(symbolD3, k -> Collections.newSetFromMap(new ConcurrentHashMap<>()))
-                      .add(new SymbolIncomingEntry(edge, absD3));
+            symbolIncoming.computeIfAbsent(symbol_d3, k -> Collections.newSetFromMap(new ConcurrentHashMap<>()))
+                      .add(new SymbolIncomingEntry(edge, d3));
 
-            // Line 88 iterate over all concrete activation units for the symbol
-            for (Unit v : symb2Reps.getOrDefault(symbolD3, Collections.emptySet())) {
+            // Line 88 iterate over all concrete activationStmt for the symbol
+            for (Unit v : symb2Reps.getOrDefault(symbol_d3, Collections.emptySet())) {
 
                 // Line 89 derive abstraction from d3 with activation unit v
-                representedFacts.add(absD3.deriveAbstractionChangeActivationStmt(v)); // abs ∥ v
+                representedFacts.add(d3.replaceActivationUnit(v)); // abs ∥ v
             }
         // Line 90 if context does not match
         } else{
             // Line 91 we assign GAS to the abstraction
-            representedFacts.add(absD3.makeActivationUnitSymbolic(Symbol.GAS));
+            representedFacts.add(d3.deriveSymbolicAbstraction(Symbol.GAS));
         }        
         
         // Line 92 return set of represented facts
@@ -163,15 +175,12 @@ public class ActivationUnitManager {
     public Abstraction attachActivationStmt(Abstraction callSiteAbs, Abstraction returnSiteAbs){        
         
         // Line 94 get symbol of returnSiteAbs (u)
-        Symbol symbolRetSiteAbs = returnSiteAbs.getConcolicActivationUnit().getSymbol();
+        Symbol symbolRetSiteAbs = returnSiteAbs.getConcolicActivationUnit().getSymbol();        
 
-        // Line 95 get conrete activation unit of callSiteAbs (v)
-        Unit activationStmntCallSiteAbs = callSiteAbs.getActivationUnit();
-
-        // Line 96  
-        if(symbolRetSiteAbs == Symbol.GAS && activationStmntCallSiteAbs != null){
+        // Line 96  check if u equals GAS - v is processed in deriveConcreteAbstraction
+        if(symbolRetSiteAbs == Symbol.GAS && callSiteAbs != null){
             // Line 97 derive abstraction from returnSiteAbs with activationStmntCallSiteAbs v
-            return returnSiteAbs.deriveAbstractionChangeActivationStmt(activationStmntCallSiteAbs);
+            return returnSiteAbs.deriveConcreteAbstraction(callSiteAbs);
         }
         else {
             // Line 98 return returnSiteAbs
@@ -187,7 +196,7 @@ public class ActivationUnitManager {
         // Line 101 if symbol is GAS and callSiteAbs is not null
         if(symbol == Symbol.GAS && callSiteAbs != null){
 
-            // Line 102 attach activation statement
+            // Line 102 attach activationstatement
             return attachActivationStmt(returnSiteAbs, callSiteAbs);
         }
 
@@ -196,5 +205,13 @@ public class ActivationUnitManager {
             return symbolize(caller, callee, returnSiteAbs);        
         }
     }
+
+    public SootMethod getMethodOf(ConcolicUnit concolicUnit) {
+        Symbol symbol = concolicUnit.getSymbol();
+		if (symbol != null)
+			return symbol.getCallee();
+		else
+			return icfg.getMethodOf(concolicUnit.getUnit());
+	}
 
 }
