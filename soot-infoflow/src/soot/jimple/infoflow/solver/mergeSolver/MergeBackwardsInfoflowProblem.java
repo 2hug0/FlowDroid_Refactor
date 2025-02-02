@@ -53,6 +53,7 @@ import soot.jimple.infoflow.solver.functions.SolverReturnFlowFunction;
 import soot.jimple.infoflow.typing.TypeUtils;
 import soot.jimple.infoflow.util.BaseSelector;
 import soot.jimple.infoflow.util.ByReferenceBoolean;
+import soot.jimple.infoflow.solver.mergeSolver.unithandling.Symbol;
 
 /**
  * Class which contains the flow functions for the backwards analysis. Not to be
@@ -62,9 +63,56 @@ import soot.jimple.infoflow.util.ByReferenceBoolean;
  */
 public class MergeBackwardsInfoflowProblem extends BackwardsInfoflowProblem {
 
+	protected final MergeInfoflowManager manager;
+
 	public MergeBackwardsInfoflowProblem(InfoflowManager manager, Abstraction zeroValue,
 			IPropagationRuleManagerFactory ruleManagerFactory) {
 		super(manager, zeroValue, ruleManagerFactory);
+		this.manager = (MergeInfoflowManager) manager;
+	}
+
+	protected Abstraction registerCallSite(Unit callSite, SootMethod callee, Abstraction activationAbs) {
+		Unit activationUnit = activationAbs.getActivationUnit();
+		Symbol activationSymbol = activationAbs.getActivationSymbol();
+		if (activationUnit == null || activationSymbol == Symbol.GAS)
+			return activationAbs;
+		
+		CallSite callSitesEntry = activationUnitsToCallSites.computeIfAbsent(activationUnit, v -> new CallSite());
+
+		if (callSitesEntry.callsites.contains(callSite))
+			return symbolizeBW(callSite, callee, activationAbs,  true);
+
+		if (activationSymbol instanceof Symbol) {
+			boolean found = callSitesEntry.callsiteMethods.get() != null && callSitesEntry.callsiteMethods.get().contains(callee);
+
+			if (found) {
+				callSitesEntry.addCallsite(callSite, manager.getICFG());
+            	return symbolizeBW(callSite, callee, activationAbs,  true);
+        	}
+
+			return symbolizeBW(callSite, callee, activationAbs,  false);
+		} else {
+			if (!activationAbs.isAbstractionActive() &&
+				!callee.getActiveBody().getUnits().contains(activationUnit)) {
+				
+				boolean found = callSitesEntry.callsiteMethods.get() != null && callSitesEntry.callsiteMethods.get().contains(callee);
+	
+				if (!found)
+					return symbolizeBW(callSite, callee, activationAbs,  false);
+			}
+
+			callSitesEntry.addCallsite(callSite, manager.getICFG());
+			return symbolizeBW(callSite, callee, activationAbs,  true);
+		}
+	}
+	
+	protected Abstraction symbolizeBW(Unit callSite, SootMethod callee, Abstraction activationAbs, boolean add) {
+		Abstraction res = manager.getActivationUnitManager().symbolize(manager.getICFG().getMethodOf(callSite), callee, activationAbs);
+		if (add) {
+			CallSite callSiteEntry = activationUnitsToCallSites.computeIfAbsent(res.getActivationUnit(), v -> new CallSite());
+			callSiteEntry.addCallsite(callSite, manager.getICFG());			
+		}
+		return res;
 	}
 
 	@Override

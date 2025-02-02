@@ -2,7 +2,6 @@ package soot.jimple.infoflow.solver.mergeSolver.unithandling;
 
 import soot.jimple.infoflow.data.accessPaths.ConcolicUnit;
 import soot.jimple.infoflow.solver.IInfoflowSolver;
-import soot.jimple.infoflow.solver.fastSolver.InfoflowSolver;
 import soot.jimple.infoflow.solver.mergeSolver.MergeInfoflowSolver;
 import soot.jimple.infoflow.data.Abstraction;
 import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
@@ -70,7 +69,7 @@ public class ActivationUnitManager {
     public void onActivationStmtAdded(Symbol symbol, Unit activationUnit) {
 
         // Line 62 get caller and callee from symbol
-        SootMethod caller = symbol.getCaller();
+        // SootMethod caller = symbol.getCaller();
         SootMethod callee = symbol.getCallee();
         
         // Line 63 iterate over all PathEdges for symbol from symbolIncoming

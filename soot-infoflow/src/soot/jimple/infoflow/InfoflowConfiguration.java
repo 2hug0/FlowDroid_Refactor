@@ -133,6 +133,11 @@ public class InfoflowConfiguration {
 		SparseContextFlowSensitive,
 
 		/**
+		 * Use a flow- and context-sensitive solver that propagates merged facts
+		 */
+		MergeContextFlowSensitive,
+
+		/**
 		 * Use a context-sensitive, but flow-insensitive solver
 		 */
 		FlowInsensitive,
@@ -1160,6 +1165,7 @@ public class InfoflowConfiguration {
 			final int prime = 31;
 			int result = 1;
 			result = prime * result + ((dataFlowSolver == null) ? 0 : dataFlowSolver.hashCode());
+			// extra needed for merge? activaionunitmanger or mergeinfoflowmanager?
 			if (dataFlowSolver == DataFlowSolver.SparseContextFlowSensitive)
 				result = prime * result + sparsePropagationStrategy.hashCode();
 			result = prime * result + maxCalleesPerCallSite;
@@ -1180,6 +1186,7 @@ public class InfoflowConfiguration {
 			SolverConfiguration other = (SolverConfiguration) obj;
 			if (dataFlowSolver != other.dataFlowSolver)
 				return false;
+			// extra needed for merge? activaionunitmanger or mergeinfoflowmanager?
 			if (dataFlowSolver == DataFlowSolver.SparseContextFlowSensitive)
 				if (sparsePropagationStrategy != other.sparsePropagationStrategy)
 					return false;

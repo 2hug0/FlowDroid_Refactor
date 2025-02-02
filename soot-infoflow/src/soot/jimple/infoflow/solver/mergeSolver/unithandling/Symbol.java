@@ -11,7 +11,7 @@ public class Symbol {
     protected final SootMethod caller;
     protected final SootMethod callee;
     protected final Abstraction abstraction;
-    protected static final Symbol GAS = new Symbol(null, null, null);
+    public static final Symbol GAS = new Symbol(null, null, null);
 
     public Symbol(SootMethod callerSM, SootMethod calleeSM, Abstraction abstraction){
         this.caller = callerSM;
@@ -30,11 +30,7 @@ public class Symbol {
 
     public Abstraction getAbstraction() {
         return abstraction;
-    }
-
-    public Symbol getGAS() {
-        return GAS;
-    }
+    }    
 
     public boolean matchContext(SootMethod callerSM, SootMethod calleeSM){
         return this.caller.equals(callerSM) && this.callee.equals(calleeSM);
