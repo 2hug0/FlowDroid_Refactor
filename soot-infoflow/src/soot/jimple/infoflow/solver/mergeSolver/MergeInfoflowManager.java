@@ -22,6 +22,15 @@ public class MergeInfoflowManager extends InfoflowManager{
 		this.activationUnitManager = activationUnitManager == null ? new ActivationUnitManager(icfg) : activationUnitManager;
 	}
 
+	protected MergeInfoflowManager(InfoflowConfiguration config, IInfoflowSolver mainSolver, IInfoflowCFG icfg,
+			ISourceSinkManager sourceSinkManager, ITaintPropagationWrapper taintWrapper, FastHierarchy hierarchy,
+			MergeInfoflowManager existingManager){
+		super(config, mainSolver, icfg, sourceSinkManager, taintWrapper, hierarchy, existingManager.getGlobalTaintManager());
+		this.activationUnitManager = existingManager.getActivationUnitManager();
+	}
+
+
+
 	public ActivationUnitManager getActivationUnitManager() {
 		return activationUnitManager;
 	}
@@ -30,6 +39,6 @@ public class MergeInfoflowManager extends InfoflowManager{
 	public void setMainSolver(IInfoflowSolver solver) {
 		super.setMainSolver(solver);
 		activationUnitManager.setForwardSolver(solver);
-	}
+	}	
     
 }

@@ -10,6 +10,7 @@
 package soot.jimple.infoflow;
 
 import soot.jimple.Stmt;
+import soot.jimple.infoflow.InfoflowConfiguration.DataFlowSolver;
 import soot.jimple.infoflow.InfoflowConfiguration.SolverConfiguration;
 import soot.jimple.infoflow.aliasing.FlowSensitiveAliasStrategy;
 import soot.jimple.infoflow.aliasing.IAliasingStrategy;
@@ -36,6 +37,8 @@ import soot.jimple.infoflow.sourcesSinks.manager.EmptySourceSinkManager;
 import soot.jimple.infoflow.sourcesSinks.manager.ISourceSinkManager;
 import soot.jimple.infoflow.sourcesSinks.manager.SinkInfo;
 import soot.jimple.infoflow.sourcesSinks.manager.SourceInfo;
+import soot.jimple.infoflow.solver.mergeSolver.MergeAliasProblem;
+import soot.jimple.infoflow.solver.mergeSolver.MergeInfoflowManager;
 
 /**
  * main infoflow class which triggers the analysis and offers method to
@@ -88,6 +91,9 @@ public class Infoflow extends AbstractInfoflow {
 	@Override
 	protected InfoflowManager initializeInfoflowManager(final ISourceSinkManager sourcesSinks, IInfoflowCFG iCfg,
 			GlobalTaintManager globalTaintManager) {
+		if(config.getSolverConfiguration().getDataFlowSolver() == DataFlowSolver.MergeContextFlowSensitive){
+			return new soot.jimple.infoflow.solver.mergeSolver.MergeInfoflowManager(config, null, iCfg, sourcesSinks, taintWrapper, hierarchy, globalTaintManager, null);
+		}	
 		return new InfoflowManager(config, null, iCfg, sourcesSinks, taintWrapper, hierarchy, globalTaintManager);
 	}
 
@@ -99,10 +105,10 @@ public class Infoflow extends AbstractInfoflow {
 		AliasProblem backProblem = null;
 		InfoflowManager aliasManager = null;
 		switch (getConfig().getAliasingAlgorithm()) {
-		case FlowSensitive:
+		case FlowSensitive:			
 			aliasManager = new InfoflowManager(config, backSolver, new BackwardsInfoflowCFG(iCfg), sourcesSinks,
-					taintWrapper, hierarchy, manager);
-			backProblem = new AliasProblem(aliasManager);
+						taintWrapper, hierarchy, manager);
+			backProblem = new AliasProblem(aliasManager);			
 			// We need to create the right data flow solver
 			SolverConfiguration solverConfig = config.getSolverConfiguration();
 			backSolver = createDataFlowSolver(executor, backProblem, solverConfig);
@@ -147,6 +153,9 @@ public class Infoflow extends AbstractInfoflow {
 
 	@Override
 	protected InfoflowProblem createInfoflowProblem(Abstraction zeroValue) {
+		if(config.getSolverConfiguration().getDataFlowSolver() == DataFlowSolver.MergeContextFlowSensitive){
+			return new soot.jimple.infoflow.solver.mergeSolver.MergeInfoflowProblem(manager, zeroValue, ruleManagerFactory);
+		}
 		return new InfoflowProblem(manager, zeroValue, ruleManagerFactory);
 	}
 

@@ -47,6 +47,7 @@ import soot.jimple.ReturnStmt;
 import soot.jimple.StaticFieldRef;
 import soot.jimple.Stmt;
 import soot.jimple.infoflow.InfoflowConfiguration.StaticFieldTrackingMode;
+import soot.jimple.infoflow.InfoflowManager;
 import soot.jimple.infoflow.aliasing.Aliasing;
 import soot.jimple.infoflow.callmappers.CallerCalleeManager;
 import soot.jimple.infoflow.callmappers.ICallerCalleeArgumentMapper;
@@ -71,10 +72,10 @@ public class MergeInfoflowProblem extends InfoflowProblem {
 
 	protected final MergeInfoflowManager manager;
 
-	public MergeInfoflowProblem(MergeInfoflowManager manager, Abstraction zeroValue,
+	public MergeInfoflowProblem(InfoflowManager manager, Abstraction zeroValue,
 			IPropagationRuleManagerFactory ruleManagerFactory) {
 		super(manager, zeroValue, ruleManagerFactory);
-		this.manager = manager;
+		this.manager = (MergeInfoflowManager) manager;
 	}
 
 	@Override

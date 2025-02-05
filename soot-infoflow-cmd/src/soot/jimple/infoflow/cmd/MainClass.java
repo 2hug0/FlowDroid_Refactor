@@ -589,6 +589,10 @@ public class MainClass {
 			return DataFlowSolver.GarbageCollecting;
 		else if (solver.equalsIgnoreCase("FPC"))
 			return DataFlowSolver.FineGrainedGC;
+		else if (solver.equalsIgnoreCase("MERGE-CONTEXTFLOWSENSITIVE"))
+			return DataFlowSolver.MergeContextFlowSensitive;
+		else if (solver.equalsIgnoreCase("SPARSE-CONTEXTFLOWSENSITIVE"))
+			return DataFlowSolver.SparseContextFlowSensitive;
 		else {
 			System.err.println(String.format("Invalid data flow solver: %s", solver));
 			throw new AbortAnalysisException();
