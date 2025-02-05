@@ -172,6 +172,9 @@ public class ActivationUnitManager {
 
     // Lines 93-98
     public Abstraction attachActivationStmt(Abstraction callSiteAbs, Abstraction returnSiteAbs){        
+        if(returnSiteAbs.getConcolicActivationUnit() == null){
+            return returnSiteAbs;        
+        }
         
         // Line 94 get symbol of returnSiteAbs (u)
         Symbol symbolRetSiteAbs = returnSiteAbs.getConcolicActivationUnit().getSymbol();        

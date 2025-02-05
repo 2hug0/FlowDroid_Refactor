@@ -107,6 +107,8 @@ import soot.jimple.infoflow.solver.gcSolver.GCSolverPeerGroup;
 import soot.jimple.infoflow.solver.memory.DefaultMemoryManagerFactory;
 import soot.jimple.infoflow.solver.memory.IMemoryManager;
 import soot.jimple.infoflow.solver.memory.IMemoryManagerFactory;
+import soot.jimple.infoflow.solver.mergeSolver.MergeInfoflowSolver;
+import soot.jimple.infoflow.solver.mergeSolver.unithandling.ActivationUnitManager;
 import soot.jimple.infoflow.solver.sparseSolver.SparseInfoflowSolver;
 import soot.jimple.infoflow.sourcesSinks.definitions.ISourceSinkDefinition;
 import soot.jimple.infoflow.sourcesSinks.definitions.MethodSourceSinkDefinition;
@@ -123,6 +125,7 @@ import soot.jimple.infoflow.util.SystemClassHandler;
 import soot.jimple.toolkits.callgraph.ReachableMethods;
 import soot.jimple.toolkits.pointer.DumbPointerAnalysis;
 import soot.options.Options;
+import soot.jimple.infoflow.solver.mergeSolver.unithandling.ActivationUnitManager;
 
 /**
  * Abstract base class for all data/information flow analyses in FlowDroid
@@ -1271,6 +1274,11 @@ public abstract class AbstractInfoflow implements IInfoflow {
 			IInfoflowSolver sparseSolver = new SparseInfoflowSolver(problem, executor, opt);
 			solverPeerGroup.addSolver(sparseSolver);
 			return sparseSolver;
+		case MergeContextFlowSensitive:		
+			logger.info("Using merge context-sensitive and flow-sensitive solver");
+			IInfoflowSolver mergeSolver = new MergeInfoflowSolver(problem, executor, null);
+			solverPeerGroup.addSolver(mergeSolver);
+			return mergeSolver;
 		case FlowInsensitive:
 			logger.info("Using context-sensitive, but flow-insensitive solver");
 			return new soot.jimple.infoflow.solver.fastSolver.flowInsensitive.InfoflowSolver(problem, executor);

@@ -26,7 +26,7 @@ public class MergeInfoflowSolver extends InfoflowSolver{
     public MergeInfoflowSolver(AbstractInfoflowProblem problem, InterruptableExecutor executor,
                                ActivationUnitManager activationUnitManager){
         super(problem, executor);        
-        this.activationUnitManager = ((MergeInfoflowManager) problem.getManager()).getActivationUnitManager();
+        this.activationUnitManager = new ActivationUnitManager(problem.getManager().getICFG());
     }
 
     @Override
