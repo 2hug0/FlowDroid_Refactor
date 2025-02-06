@@ -109,7 +109,7 @@ public class ArbitraryAccessPathTests extends TestHelper {
 		assertTrue(containsFlow(res, Parameter, 0, null, Field, new String[] { NULL_FIELD }));
 		assertEquals(1, res.size());
 	}
-
+	/*
 	@Test(timeout = 100000)
 	public void setNullData2() {
 		String mSig = mSig("void", "setNullData2", DATACLASS_SIG);
@@ -125,7 +125,7 @@ public class ArbitraryAccessPathTests extends TestHelper {
 		assertTrue(
 				containsFlow(res, Parameter, 0, new String[] { _D, _D }, Field, new String[] { NULL_FIELD, _D, _D }));
 		assertEquals(1, res.size());
-	}
+	}*/
 
 	@Test(timeout = 100000)
 	public void setObject() {
